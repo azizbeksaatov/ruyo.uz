@@ -1,3 +1,5 @@
+import { dreamsExtra } from './dreams-extra';
+
 export interface Dream {
   slug: string;
   title: string;
@@ -1403,6 +1405,7 @@ export const dreams: Dream[] = [
     tags: ['власть', 'женственность', 'лидерство', 'признание'],
     related: ['korol', 'tron', 'dvorec', 'korona', 'princessa'],
   },
+  ...dreamsExtra,
 ];
 
 export function getDreamBySlug(slug: string): Dream | undefined {
