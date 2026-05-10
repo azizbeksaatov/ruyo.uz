@@ -47,7 +47,32 @@ export default async function HoroscopePage({ params }: { params: Promise<{ loca
   const h = getHoroscopeForToday(slug);
   const otherSigns = zodiacSigns.filter((s) => s.slug !== slug).slice(0, 8);
 
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
+      { '@type': 'ListItem', position: 2, name: tNav('goroskop'), item: `https://ruyo.uz/${locale}/goroskop` },
+      { '@type': 'ListItem', position: 3, name: signName, item: `https://ruyo.uz/${locale}/goroskop/${slug}` },
+    ],
+  };
+
+  const articleData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: `Гороскоп ${signName} — ${t('today')}`,
+    description: `${signName}: ${t('love_label')}, ${t('finance_label')}, ${t('health_label')}. Ruyo.uz`,
+    author: { '@type': 'Organization', name: 'Ruyo.uz' },
+    publisher: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz' },
+    datePublished: new Date().toISOString().split('T')[0],
+    dateModified: new Date().toISOString().split('T')[0],
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://ruyo.uz/${locale}/goroskop/${slug}` },
+  };
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleData) }} />
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
       {/* Breadcrumb */}
@@ -143,6 +168,7 @@ export default async function HoroscopePage({ params }: { params: Promise<{ loca
         </div>
       </div>
     </div>
+    </>
   );
 }
 

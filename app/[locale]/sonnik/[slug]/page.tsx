@@ -46,11 +46,25 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
     description: dream.short,
     author: { '@type': 'Organization', name: 'Ruyo.uz' },
     publisher: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz' },
+    datePublished: '2024-01-01',
+    dateModified: new Date().toISOString().split('T')[0],
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://ruyo.uz/${locale}/sonnik/${dream.slug}` },
+  };
+
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
+      { '@type': 'ListItem', position: 2, name: tNav('sonnik'), item: `https://ruyo.uz/${locale}/sonnik` },
+      { '@type': 'ListItem', position: 3, name: dream.title, item: `https://ruyo.uz/${locale}/sonnik/${dream.slug}` },
+    ],
   };
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Breadcrumb */}
