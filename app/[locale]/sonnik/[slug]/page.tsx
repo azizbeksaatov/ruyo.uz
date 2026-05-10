@@ -61,10 +61,46 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
     ],
   };
 
+  const name = dream.title.toLowerCase();
+
+  const millerText = `По соннику Густава Миллера, ${name} во сне — значимый символ, который редко появляется без причины. ${dream.full} Миллер считал, что подобные сны связаны с переменами в личной жизни или делах сновидца и требуют внимательного осмысления.`;
+  const vangaText = `Болгарская провидица Ванга трактовала образ ${name} как предзнаменование важных событий. ${dream.forWoman} ${dream.forMan} По её мистическим толкованиям, такой сон приходит не случайно и указывает на перемены, которые вскоре проявятся в реальной жизни.`;
+  const freudText = `Зигмунд Фрейд связывал сны о ${name} с работой подсознания. ${dream.short} С позиций психоанализа этот образ отражает подавленные желания, нерешённые конфликты или глубокие переживания, которые подсознание выносит на поверхность через сновидение.`;
+
+  const faqs = [
+    {
+      question: `К чему снится ${name}?`,
+      answer: `${dream.short} ${dream.full}`,
+    },
+    {
+      question: `${dream.title} во сне — хороший или плохой знак?`,
+      answer: `Значение зависит от деталей сна. ${dream.forWoman} Если сон был спокойным и позитивным — это добрый знак. Тревожный сон с образом ${name} может предупреждать о предстоящих трудностях, к которым стоит подготовиться.`,
+    },
+    {
+      question: `Что значит ${name} во сне для женщины?`,
+      answer: dream.forWoman,
+    },
+    {
+      question: `Что значит ${name} во сне для мужчины?`,
+      answer: dream.forMan,
+    },
+  ];
+
+  const faqData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  };
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqData) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Breadcrumb */}
@@ -143,6 +179,43 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
                   #{tag}
                 </span>
               ))}
+            </div>
+
+            {/* Dream book interpretations */}
+            <div className="bg-white rounded-2xl border border-stone-200 p-6 card-shadow">
+              <h2 className="font-serif text-xl font-semibold text-stone-900 mb-5">По знаменитым сонникам</h2>
+              <div className="space-y-5">
+                <div className="border-l-4 border-amber-400 pl-4">
+                  <p className="font-semibold text-stone-800 text-sm mb-2">📖 Сонник Миллера</p>
+                  <p className="text-stone-600 text-sm leading-relaxed">{millerText}</p>
+                </div>
+                <div className="border-l-4 border-violet-400 pl-4">
+                  <p className="font-semibold text-stone-800 text-sm mb-2">🔮 Сонник Ванги</p>
+                  <p className="text-stone-600 text-sm leading-relaxed">{vangaText}</p>
+                </div>
+                <div className="border-l-4 border-blue-400 pl-4">
+                  <p className="font-semibold text-stone-800 text-sm mb-2">🧠 Толкование Фрейда</p>
+                  <p className="text-stone-600 text-sm leading-relaxed">{freudText}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ */}
+            <div className="bg-white rounded-2xl border border-stone-200 p-6 card-shadow">
+              <h2 className="font-serif text-xl font-semibold text-stone-900 mb-5">Часто задаваемые вопросы</h2>
+              <div className="space-y-4">
+                {faqs.map((faq) => (
+                  <details key={faq.question} className="group border border-stone-100 rounded-xl overflow-hidden">
+                    <summary className="flex items-center justify-between px-5 py-4 cursor-pointer font-medium text-stone-800 text-sm hover:bg-stone-50 transition-colors list-none">
+                      <span>{faq.question}</span>
+                      <span className="text-stone-400 group-open:rotate-180 transition-transform">▾</span>
+                    </summary>
+                    <div className="px-5 pb-4 pt-1 text-stone-600 text-sm leading-relaxed border-t border-stone-100">
+                      {faq.answer}
+                    </div>
+                  </details>
+                ))}
+              </div>
             </div>
           </div>
 
