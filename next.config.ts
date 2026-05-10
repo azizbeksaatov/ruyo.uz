@@ -6,8 +6,6 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const nextConfig: NextConfig = {
   // Compress output
   compress: true,
-  // Generate standalone build for Docker/Vercel
-  output: 'standalone',
   // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
