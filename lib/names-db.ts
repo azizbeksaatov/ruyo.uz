@@ -23,14 +23,15 @@ function mapRow(row: DbRow): NameEntry {
 }
 
 export async function fetchNames(opts: {
-  origin?: string; q?: string; page?: number; limit?: number;
+  origin?: string; q?: string; letter?: string; page?: number; limit?: number;
 }) {
-  const { origin, q, page = 1, limit = 120 } = opts;
+  const { origin, q, letter, page = 1, limit = 120 } = opts;
   const sb = createServerSupabase();
   let query = sb.from('names').select('*', { count: 'exact' })
     .eq('status', 'approved').order('name');
   if (origin) query = query.eq('origin', origin);
   if (q) query = query.ilike('name', `%${q}%`);
+  if (letter) query = query.ilike('name', `${letter}%`);
   const from = (page - 1) * limit;
   const { data, count } = await query.range(from, from + limit - 1);
   return { names: (data ?? []).map(mapRow), total: count ?? 0 };

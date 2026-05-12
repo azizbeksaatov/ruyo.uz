@@ -23,19 +23,21 @@ const ORIGIN_EMOJI: Record<NameOrigin, string> = {
 
 const LIMIT = 120;
 
+const CYRILLIC_LETTERS = ['А','Б','В','Г','Д','Е','Ж','З','И','К','Л','М','Н','О','П','Р','С','Т','У','Ф','Х','Ц','Ч','Ш','Э','Ю','Я'];
+
 export default async function NamesPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ origin?: string; q?: string; page?: string }>;
+  searchParams: Promise<{ origin?: string; q?: string; letter?: string; page?: string }>;
 }) {
   const { locale } = await params;
-  const { origin, q, page: pageStr } = await searchParams;
+  const { origin, q, letter, page: pageStr } = await searchParams;
   const t = await getTranslations({ locale, namespace: 'names' });
   const page = Math.max(1, parseInt(pageStr ?? '1') || 1);
 
-  const { names: filteredNames, total } = await fetchNames({ origin, q, page, limit: LIMIT });
+  const { names: filteredNames, total } = await fetchNames({ origin, q, letter, page, limit: LIMIT });
   const totalPages = Math.ceil(total / LIMIT);
 
   const notFound = !!q && filteredNames.length === 0;
@@ -45,9 +47,17 @@ export default async function NamesPage({
     const sp = new URLSearchParams();
     if (origin) sp.set('origin', origin);
     if (q) sp.set('q', q);
+    if (letter) sp.set('letter', letter);
     if (p > 1) sp.set('page', String(p));
     const qs = sp.toString();
     return `/${locale}/imena${qs ? `?${qs}` : ''}`;
+  }
+
+  function letterHref(l: string) {
+    const sp = new URLSearchParams();
+    if (origin) sp.set('origin', origin);
+    sp.set('letter', l);
+    return `/${locale}/imena?${sp.toString()}`;
   }
 
   return (
@@ -97,6 +107,25 @@ export default async function NamesPage({
           >
             <span>{ORIGIN_EMOJI[orig]}</span>
             {ORIGIN_LABELS[orig][localeKey]}
+          </Link>
+        ))}
+      </div>
+
+      {/* Alphabet bar */}
+      <div className="flex flex-wrap gap-1 mb-8">
+        <Link
+          href={`/${locale}/imena${origin ? `?origin=${origin}` : ''}`}
+          className={`px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${!letter && !q ? 'bg-teal-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-teal-300 hover:text-teal-700'}`}
+        >
+          Все
+        </Link>
+        {CYRILLIC_LETTERS.map((l) => (
+          <Link
+            key={l}
+            href={letterHref(l)}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${letter === l ? 'bg-teal-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-teal-300 hover:text-teal-700'}`}
+          >
+            {l}
           </Link>
         ))}
       </div>

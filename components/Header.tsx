@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Menu, X, Search } from 'lucide-react';
@@ -44,11 +45,8 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center gap-2">
-            <span className="text-2xl">🌙</span>
-            <span className="font-serif text-xl font-semibold text-stone-900 tracking-tight">
-              Ruyo<span className="text-violet-600">.uz</span>
-            </span>
+          <Link href={`/${locale}`} className="flex items-center">
+            <Image src="/logo.png" alt="Ruyo.uz" width={134} height={36} className="h-9 w-auto" priority />
           </Link>
 
           {/* Desktop nav */}

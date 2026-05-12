@@ -1413,7 +1413,7 @@ export function getDreamBySlug(slug: string): Dream | undefined {
 }
 
 export function getDreamsByLetter(letter: string): Dream[] {
-  return dreams.filter((d) => d.letter === letter);
+  return dreams.filter((d) => d.title.charAt(0).toUpperCase() === letter);
 }
 
 export function getRelatedDreams(slugs: string[]): Dream[] {

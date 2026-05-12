@@ -33,6 +33,7 @@ export async function generateMetadata({
       locale: locale === 'uz' ? 'uz_UZ' : 'ru_RU',
       url: 'https://ruyo.uz',
       siteName: 'Ruyo.uz',
+      images: [{ url: '/logo.png', width: 534, height: 144, alt: 'Ruyo.uz' }],
     },
     robots: { index: true, follow: true },
   };

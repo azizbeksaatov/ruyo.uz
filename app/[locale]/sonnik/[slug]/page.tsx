@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getDreamBySlug, dreams } from '@/data/dreams';
+import { dreamsUz } from '@/data/dreams-uz';
 import { getTranslations } from 'next-intl/server';
 import { User, Users, Calendar } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -15,11 +16,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const dream = getDreamBySlug(slug);
   if (!dream) return {};
   const t = await getTranslations({ locale, namespace: 'sonnik' });
+  const uz = locale === 'uz' ? dreamsUz[slug] : undefined;
+  const title = uz?.title ?? dream.title;
+  const short = uz?.short ?? dream.short;
   return {
-    title: `${t('dream_prefix')} ${dream.title.toLowerCase()} — ${t('dream_meaning')}`,
-    description: dream.short,
+    title: `${t('dream_prefix')} ${title.toLowerCase()} — ${t('dream_meaning')}`,
+    description: short,
     alternates: { canonical: `https://ruyo.uz/${locale}/sonnik/${slug}` },
-    openGraph: { title: `${t('dream_prefix')} ${dream.title.toLowerCase()} — Ruyo.uz`, description: dream.short },
+    openGraph: { title: `${t('dream_prefix')} ${title.toLowerCase()} — Ruyo.uz`, description: short },
   };
 }
 
@@ -30,6 +34,17 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
 
   const t = await getTranslations({ locale, namespace: 'sonnik' });
   const tNav = await getTranslations({ locale, namespace: 'nav' });
+
+  const uz = locale === 'uz' ? dreamsUz[slug] : undefined;
+  const content = {
+    title: uz?.title ?? dream.title,
+    short: uz?.short ?? dream.short,
+    full: uz?.full ?? dream.full,
+    forWoman: uz?.forWoman ?? dream.forWoman,
+    forMan: uz?.forMan ?? dream.forMan,
+    byDay: uz?.byDay ?? dream.byDay,
+    tags: uz?.tags ?? dream.tags,
+  };
 
   const DAY_LABELS: Record<string, string> = {
     monday: t('monday'), tuesday: t('tuesday'), wednesday: t('wednesday'),
@@ -42,8 +57,8 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: `${t('dream_prefix')} ${dream.title}`,
-    description: dream.short,
+    headline: `${t('dream_prefix')} ${content.title}`,
+    description: content.short,
     author: { '@type': 'Organization', name: 'Ruyo.uz' },
     publisher: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz' },
     datePublished: '2024-01-01',
@@ -57,32 +72,55 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
       { '@type': 'ListItem', position: 2, name: tNav('sonnik'), item: `https://ruyo.uz/${locale}/sonnik` },
-      { '@type': 'ListItem', position: 3, name: dream.title, item: `https://ruyo.uz/${locale}/sonnik/${dream.slug}` },
+      { '@type': 'ListItem', position: 3, name: content.title, item: `https://ruyo.uz/${locale}/sonnik/${dream.slug}` },
     ],
   };
 
-  const name = dream.title.toLowerCase();
+  const name = content.title.toLowerCase();
 
-  const millerText = `По соннику Густава Миллера, ${name} во сне — значимый символ, который редко появляется без причины. ${dream.full} Миллер считал, что подобные сны связаны с переменами в личной жизни или делах сновидца и требуют внимательного осмысления.`;
-  const vangaText = `Болгарская провидица Ванга трактовала образ ${name} как предзнаменование важных событий. ${dream.forWoman} ${dream.forMan} По её мистическим толкованиям, такой сон приходит не случайно и указывает на перемены, которые вскоре проявятся в реальной жизни.`;
-  const freudText = `Зигмунд Фрейд связывал сны о ${name} с работой подсознания. ${dream.short} С позиций психоанализа этот образ отражает подавленные желания, нерешённые конфликты или глубокие переживания, которые подсознание выносит на поверхность через сновидение.`;
+  const millerText = locale === 'uz'
+    ? `Gʻustav Miller talqiniga koʻra, tushda ${name} koʻrish — muhim ramz. ${content.full} Miller bunday tushlar hayotdagi oʻzgarishlar bilan bogʻliq deb hisoblagan.`
+    : `По соннику Густава Миллера, ${name} во сне — значимый символ, который редко появляется без причины. ${content.full} Миллер считал, что подобные сны связаны с переменами в личной жизни или делах сновидца и требуют внимательного осмысления.`;
+  const vangaText = locale === 'uz'
+    ? `Bolgar bashoratchi Vanga tushda ${name} koʻrishni muhim voqealar alomati sifatida talqin etgan. ${content.forWoman} ${content.forMan} Uning talqiniga koʻra, bunday tush bejiz tushmaydi.`
+    : `Болгарская провидица Ванга трактовала образ ${name} как предзнаменование важных событий. ${content.forWoman} ${content.forMan} По её мистическим толкованиям, такой сон приходит не случайно и указывает на перемены, которые вскоре проявятся в реальной жизни.`;
+  const freudText = locale === 'uz'
+    ? `Zigmund Freyd tushda ${name} koʻrishni ong osti bilan bogʻlagan. ${content.short} Psixoanaliz nuqtai nazaridan bu obraz bosilgan xohishlar va hal etilmagan nizolarni aks ettiradi.`
+    : `Зигмунд Фрейд связывал сны о ${name} с работой подсознания. ${content.short} С позиций психоанализа этот образ отражает подавленные желания, нерешённые конфликты или глубокие переживания, которые подсознание выносит на поверхность через сновидение.`;
 
-  const faqs = [
+  const faqs = locale === 'uz' ? [
     {
-      question: `К чему снится ${name}?`,
-      answer: `${dream.short} ${dream.full}`,
+      question: `${name} tushga kirsa nima boʻladi?`,
+      answer: `${content.short} ${content.full}`,
     },
     {
-      question: `${dream.title} во сне — хороший или плохой знак?`,
-      answer: `Значение зависит от деталей сна. ${dream.forWoman} Если сон был спокойным и позитивным — это добрый знак. Тревожный сон с образом ${name} может предупреждать о предстоящих трудностях, к которым стоит подготовиться.`,
+      question: `Tushda ${name} — yaxshi yoki yomon belgi?`,
+      answer: `Maʼnosi tush tafsilotlariga bogʻliq. ${content.forWoman} Agar tush tinch va ijobiy boʻlsa — bu yaxshi belgi. Xavotirli tush ogohlantirishni anglatishi mumkin.`,
+    },
+    {
+      question: `Ayol uchun tushda ${name} nima anglatadi?`,
+      answer: content.forWoman,
+    },
+    {
+      question: `Erkak uchun tushda ${name} nima anglatadi?`,
+      answer: content.forMan,
+    },
+  ] : [
+    {
+      question: `К чему снится ${name}?`,
+      answer: `${content.short} ${content.full}`,
+    },
+    {
+      question: `${content.title} во сне — хороший или плохой знак?`,
+      answer: `Значение зависит от деталей сна. ${content.forWoman} Если сон был спокойным и позитивным — это добрый знак. Тревожный сон с образом ${name} может предупреждать о предстоящих трудностях, к которым стоит подготовиться.`,
     },
     {
       question: `Что значит ${name} во сне для женщины?`,
-      answer: dream.forWoman,
+      answer: content.forWoman,
     },
     {
       question: `Что значит ${name} во сне для мужчины?`,
-      answer: dream.forMan,
+      answer: content.forMan,
     },
   ];
 
@@ -124,9 +162,9 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
                 <div>
                   <p className="text-violet-600 text-sm font-medium mb-1">{t('ruyo_label')}</p>
                   <h1 className="font-serif text-3xl font-semibold text-stone-900 mb-3">
-                    {t('dream_prefix')} {dream.title.toLowerCase()}
+                    {content.title}
                   </h1>
-                  <p className="text-stone-600 text-lg leading-relaxed">{dream.short}</p>
+                  <p className="text-stone-600 text-lg leading-relaxed">{content.short}</p>
                 </div>
               </div>
             </div>
@@ -134,7 +172,7 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
             {/* Full interpretation */}
             <div className="bg-white rounded-2xl border border-stone-200 p-6 card-shadow">
               <h2 className="font-serif text-xl font-semibold text-stone-900 mb-4">{t('detailed')}</h2>
-              <p className="text-stone-600 leading-relaxed">{dream.full}</p>
+              <p className="text-stone-600 leading-relaxed">{content.full}</p>
             </div>
 
             {/* For woman / man */}
@@ -143,13 +181,13 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
                 <h3 className="font-semibold text-rose-700 mb-3 flex items-center gap-2 text-sm uppercase tracking-wide">
                   <User className="w-4 h-4" /> {t('for_woman')}
                 </h3>
-                <p className="text-stone-600 text-sm leading-relaxed">{dream.forWoman}</p>
+                <p className="text-stone-600 text-sm leading-relaxed">{content.forWoman}</p>
               </div>
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
                 <h3 className="font-semibold text-blue-700 mb-3 flex items-center gap-2 text-sm uppercase tracking-wide">
                   <Users className="w-4 h-4" /> {t('for_man')}
                 </h3>
-                <p className="text-stone-600 text-sm leading-relaxed">{dream.forMan}</p>
+                <p className="text-stone-600 text-sm leading-relaxed">{content.forMan}</p>
               </div>
             </div>
 
@@ -160,7 +198,7 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
                 {t('by_day')}
               </h2>
               <div className="divide-y divide-stone-100">
-                {Object.entries(dream.byDay).map(([day, meaning]) => (
+                {Object.entries(content.byDay).map(([day, meaning]) => (
                   <div key={day} className="py-3 flex gap-4">
                     <span className="shrink-0 font-semibold text-sm text-stone-400 w-28">{DAY_LABELS[day]}</span>
                     <span className="text-stone-600 text-sm leading-relaxed">{meaning}</span>
@@ -174,7 +212,7 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2">
-              {dream.tags.map((tag) => (
+              {content.tags.map((tag) => (
                 <span key={tag} className="px-3 py-1 rounded-full bg-violet-50 border border-violet-100 text-violet-600 text-sm">
                   #{tag}
                 </span>
@@ -183,7 +221,9 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
 
             {/* Dream book interpretations */}
             <div className="bg-white rounded-2xl border border-stone-200 p-6 card-shadow">
-              <h2 className="font-serif text-xl font-semibold text-stone-900 mb-5">По знаменитым сонникам</h2>
+              <h2 className="font-serif text-xl font-semibold text-stone-900 mb-5">
+                {locale === 'uz' ? 'Mashhur ta\'birnomalarga ko\'ra' : 'По знаменитым сонникам'}
+              </h2>
               <div className="space-y-5">
                 <div className="border-l-4 border-amber-400 pl-4">
                   <p className="font-semibold text-stone-800 text-sm mb-2">📖 Сонник Миллера</p>
@@ -202,7 +242,9 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
 
             {/* FAQ */}
             <div className="bg-white rounded-2xl border border-stone-200 p-6 card-shadow">
-              <h2 className="font-serif text-xl font-semibold text-stone-900 mb-5">Часто задаваемые вопросы</h2>
+              <h2 className="font-serif text-xl font-semibold text-stone-900 mb-5">
+                {locale === 'uz' ? 'Ko\'p so\'raladigan savollar' : 'Часто задаваемые вопросы'}
+              </h2>
               <div className="space-y-4">
                 {faqs.map((faq) => (
                   <details key={faq.question} className="group border border-stone-100 rounded-xl overflow-hidden">

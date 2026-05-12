@@ -1,9 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { dreams, searchDreams, getDreamsByLetter } from '@/data/dreams';
+import { dreamsUz } from '@/data/dreams-uz';
 import { ALPHABET_RU } from '@/lib/utils';
 import { Search } from 'lucide-react';
 import type { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -26,11 +29,12 @@ export default async function SonnikPage({
   const { q, letter } = await searchParams;
   const t = await getTranslations({ locale, namespace: 'sonnik' });
 
-  const displayDreams = q
+  const displayDreams = (q
     ? searchDreams(q)
     : letter
     ? getDreamsByLetter(letter.toUpperCase())
-    : dreams;
+    : dreams
+  ).sort((a, b) => a.title.localeCompare(b.title, 'ru'));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -66,26 +70,27 @@ export default async function SonnikPage({
 
       {/* Alphabet */}
       <div className="flex flex-wrap gap-1.5 mb-10">
-        <Link
+        <a
           href={`/${locale}/sonnik`}
           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${!letter && !q ? 'bg-violet-600 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:border-violet-300 hover:text-violet-600'}`}
         >
           {t('alphabet_all')}
-        </Link>
+        </a>
         {ALPHABET_RU.map((char) => (
-          <Link
+          <a
             key={char}
-            href={`/${locale}/sonnik?letter=${char}`}
+            href={`/${locale}/sonnik?letter=${encodeURIComponent(char)}`}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${letter?.toUpperCase() === char ? 'bg-violet-600 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:border-violet-300 hover:text-violet-600'}`}
           >
             {char}
-          </Link>
+          </a>
         ))}
       </div>
 
-      {q && (
+      {(q || letter) && (
         <p className="text-stone-500 text-sm mb-6">
-          {t('search_results', { q })} <span className="font-medium text-stone-900">{displayDreams.length}</span> {t('dreams_suffix')}
+          {q ? t('search_results', { q }) : `Буква «${letter?.toUpperCase()}»:`}{' '}
+          <span className="font-medium text-stone-900">{displayDreams.length}</span> {t('dreams_suffix')}
         </p>
       )}
 
@@ -99,7 +104,12 @@ export default async function SonnikPage({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {displayDreams.map((dream) => (
+          {displayDreams.map((dream) => {
+            const uz = locale === 'uz' ? dreamsUz[dream.slug] : undefined;
+            const title = uz?.title ?? dream.title;
+            const short = uz?.short ?? dream.short;
+            const tags = uz?.tags ?? dream.tags;
+            return (
             <Link
               key={dream.slug}
               href={`/${locale}/sonnik/${dream.slug}`}
@@ -109,11 +119,11 @@ export default async function SonnikPage({
                 <span className="text-xl mt-0.5">🌙</span>
                 <div className="min-w-0">
                   <h2 className="font-semibold text-stone-900 group-hover:text-violet-700 transition-colors">
-                    {t('dream_prefix')} {dream.title.toLowerCase()}
+                    {title}
                   </h2>
-                  <p className="text-sm text-stone-500 mt-1 line-clamp-2 leading-relaxed">{dream.short}</p>
+                  <p className="text-sm text-stone-500 mt-1 line-clamp-2 leading-relaxed">{short}</p>
                   <div className="flex flex-wrap gap-1 mt-3">
-                    {dream.tags.slice(0, 2).map((tag) => (
+                    {tags.slice(0, 2).map((tag) => (
                       <span key={tag} className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 text-xs">
                         {tag}
                       </span>
@@ -122,7 +132,8 @@ export default async function SonnikPage({
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
