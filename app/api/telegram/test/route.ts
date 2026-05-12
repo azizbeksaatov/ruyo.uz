@@ -46,6 +46,11 @@ ${test.questions.length} savoldan iborat testni bajaring va biling!
 
 #test #shaxsiyat #psixologiya #ruyo`;
 
-  await broadcastBilingual(textRu, textUz);
-  return NextResponse.json({ ok: true, test: test.slug });
+  try {
+    await broadcastBilingual(textRu, textUz);
+    return NextResponse.json({ ok: true, test: test.slug });
+  } catch (err: any) {
+    console.error('Telegram test error:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

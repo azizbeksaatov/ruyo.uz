@@ -46,6 +46,11 @@ export async function GET(req: NextRequest) {
 
 #tushta #tushta'biri #ruyo`;
 
-  await broadcastBilingual(textRu, textUz);
-  return NextResponse.json({ ok: true, dream: dream.slug });
+  try {
+    await broadcastBilingual(textRu, textUz);
+    return NextResponse.json({ ok: true, dream: dream.slug });
+  } catch (err: any) {
+    console.error('Telegram dream error:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

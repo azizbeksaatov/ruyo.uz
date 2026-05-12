@@ -51,6 +51,11 @@ ${originEmoji} Kelib chiqishi: <i>${name.origin}</i>
 
 #ism #${name.name.toLowerCase()} #ismmаnosi #ruyo`;
 
-  await broadcastBilingual(textRu, textUz);
-  return NextResponse.json({ ok: true, name: name.slug });
+  try {
+    await broadcastBilingual(textRu, textUz);
+    return NextResponse.json({ ok: true, name: name.slug });
+  } catch (err: any) {
+    console.error('Telegram name error:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
