@@ -1,6 +1,7 @@
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
-const CHANNEL_RU = process.env.TELEGRAM_CHANNEL_RU ?? '@ruyouz_ru';
-const CHANNEL_UZ = process.env.TELEGRAM_CHANNEL_UZ ?? '@ruyo_uz';
+// Numeric IDs as reliable fallback (usernames can fail if entered without @)
+const CHANNEL_RU = process.env.TELEGRAM_CHANNEL_RU ?? '-1003847617834';
+const CHANNEL_UZ = process.env.TELEGRAM_CHANNEL_UZ ?? '-1003656113583';
 
 export async function sendMessage(chatId: string, text: string): Promise<void> {
   const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
