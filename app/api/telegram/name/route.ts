@@ -6,7 +6,6 @@ function utmLink(locale: string, slug: string): string {
   return `https://ruyo.uz/${locale}/imya/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=imya`;
 }
 
-// Sort by popularity descending so most popular names rotate first
 const sortedNames = [...names].sort((a, b) => b.popularity - a.popularity);
 
 const originEmojiMap: Record<string, string> = {
@@ -15,8 +14,25 @@ const originEmojiMap: Record<string, string> = {
   scandinavian: '⚔️',
 };
 
+const originRu: Record<string, string> = {
+  uzbek: 'Узбекское', arabic: 'Арабское', persian: 'Персидское', turkic: 'Тюркское',
+  slavic: 'Славянское', greek: 'Греческое', latin: 'Латинское', hebrew: 'Еврейское',
+  scandinavian: 'Скандинавское',
+};
+
+const originUz: Record<string, string> = {
+  uzbek: "O'zbek", arabic: 'Arab', persian: 'Fors', turkic: 'Turk',
+  slavic: 'Slavyan', greek: 'Yunon', latin: 'Lotin', hebrew: 'Ibroniy',
+  scandinavian: 'Skandinaviya',
+};
+
+const elementUz: Record<string, string> = {
+  'Земля': 'Yer', 'Вода': 'Suv', 'Огонь': 'Olov', 'Воздух': 'Havo',
+  'Эфир': 'Efir', 'Металл': 'Metall', 'Дерево': 'Daraxt',
+};
+
 export async function GET(req: NextRequest) {
-  const secret = req.headers.get("authorization");
+  const secret = req.headers.get('authorization');
   if (secret !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -24,11 +40,14 @@ export async function GET(req: NextRequest) {
   const name = sortedNames[dailyIndex(sortedNames, 2)];
   const genderEmoji = name.gender === 'male' ? '👦' : name.gender === 'female' ? '👧' : '👤';
   const originEmoji = originEmojiMap[name.origin] ?? '✨';
+  const origRu = originRu[name.origin] ?? name.origin;
+  const origUz = originUz[name.origin] ?? name.origin;
+  const elemUz = elementUz[name.element] ?? name.element;
 
   const textRu =
 `${genderEmoji} <b>Имя ${name.name}</b> — что оно означает?
 
-${originEmoji} Происхождение: <i>${name.origin}</i>
+${originEmoji} Происхождение: <i>${origRu}</i>
 ✨ ${name.meaning}
 
 🔢 Счастливые числа: ${name.luckyNumbers.join(', ')}
@@ -41,11 +60,11 @@ ${originEmoji} Происхождение: <i>${name.origin}</i>
   const textUz =
 `${genderEmoji} <b>${name.name} ismi</b> — bu nima degani?
 
-${originEmoji} Kelib chiqishi: <i>${name.origin}</i>
+${originEmoji} Kelib chiqishi: <i>${origUz}</i>
 ✨ ${name.meaning}
 
 🔢 Baxtli raqamlar: ${name.luckyNumbers.join(', ')}
-🌿 Element: ${name.element}
+🌿 Element: ${elemUz}
 
 📖 Ismning to'liq tahlili → ${utmLink('uz', name.slug)}
 
