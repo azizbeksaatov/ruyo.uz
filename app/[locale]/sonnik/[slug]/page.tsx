@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getDreamBySlug, dreams } from '@/data/dreams';
+import { getDreamBySlug, dreams, TRENDING_DREAMS } from '@/data/dreams';
 import { dreamsUz } from '@/data/dreams-uz';
 import { getTranslations } from 'next-intl/server';
-import { User, Users, Calendar } from 'lucide-react';
+import { getUzFirstLetter } from '@/lib/utils';
+import { getDreamDiscoverTitle, getDreamDiscoverDescription, getDreamEmoji, getSlugDate, ogImageUrl } from '@/lib/discover';
+import { User, Users, Calendar, TrendingUp } from 'lucide-react';
 import type { Metadata } from 'next';
 import DreamAiInterpreter from '@/components/DreamAiInterpreter';
 
@@ -15,15 +17,42 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale, slug } = await params;
   const dream = getDreamBySlug(slug);
   if (!dream) return {};
-  const t = await getTranslations({ locale, namespace: 'sonnik' });
   const uz = locale === 'uz' ? dreamsUz[slug] : undefined;
   const title = uz?.title ?? dream.title;
   const short = uz?.short ?? dream.short;
+
+  const discoverTitle = getDreamDiscoverTitle(title, slug, locale);
+  const discoverDesc  = getDreamDiscoverDescription(short, title, locale);
+  const emoji = getDreamEmoji(slug, dream.tags);
+  const imageUrl = ogImageUrl({ title: discoverTitle, emoji, type: 'dream', locale });
+  const canonical = locale === 'uz' ? `https://ruyo.uz/uz/sonnik/${slug}` : `https://ruyo.uz/sonnik/${slug}`;
+
   return {
-    title: `${t('dream_prefix')} ${title.toLowerCase()} — ${t('dream_meaning')}`,
-    description: short,
-    alternates: { canonical: `https://ruyo.uz/${locale}/sonnik/${slug}` },
-    openGraph: { title: `${t('dream_prefix')} ${title.toLowerCase()} — Ruyo.uz`, description: short },
+    title: discoverTitle,
+    description: discoverDesc,
+    alternates: {
+      canonical,
+      languages: {
+        ru: `https://ruyo.uz/sonnik/${slug}`,
+        uz: `https://ruyo.uz/uz/sonnik/${slug}`,
+      },
+    },
+    openGraph: {
+      title: discoverTitle,
+      description: discoverDesc,
+      type: 'article',
+      url: canonical,
+      siteName: 'Ruyo.uz',
+      publishedTime: getSlugDate(slug),
+      modifiedTime: new Date().toISOString().split('T')[0],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: discoverTitle,
+      description: discoverDesc,
+      images: [imageUrl],
+    },
   };
 }
 
@@ -51,19 +80,50 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
     thursday: t('thursday'), friday: t('friday'), saturday: t('saturday'), sunday: t('sunday'),
   };
 
-  const relatedDreams = dreams.filter((d) => dream.related.includes(d.slug)).slice(0, 5);
-  const otherDreams = dreams.filter((d) => d.letter === dream.letter && d.slug !== dream.slug).slice(0, 6);
+  const seenRel = new Set<string>();
+  const relatedDreams = dreams.filter((d) => {
+    if (!dream.related.includes(d.slug) || seenRel.has(d.slug)) return false;
+    seenRel.add(d.slug);
+    return true;
+  }).slice(0, 5);
+
+  // Trending: popular dreams excluding current, by tag overlap
+  const trendingDreams = TRENDING_DREAMS
+    .filter((s) => s !== slug)
+    .map((s) => dreams.find((d) => d.slug === s))
+    .filter(Boolean)
+    .slice(0, 6) as typeof dreams;
+
+  const uzLetter = locale === 'uz' ? getUzFirstLetter(uz?.title ?? dream.title) : dream.letter;
+  const seenOther = new Set<string>();
+  const otherDreams = dreams.filter((d) => {
+    if (d.slug === slug || seenOther.has(d.slug)) return false;
+    const matches = locale === 'uz'
+      ? getUzFirstLetter(dreamsUz[d.slug]?.title ?? d.title) === uzLetter
+      : d.letter === dream.letter;
+    if (!matches) return false;
+    seenOther.add(d.slug);
+    return true;
+  }).slice(0, 6);
+
+  const discoverTitle = getDreamDiscoverTitle(content.title, slug, locale);
+  const dreamEmoji    = getDreamEmoji(slug, dream.tags);
+  const ogUrl         = ogImageUrl({ title: discoverTitle, emoji: dreamEmoji, type: 'dream', locale });
 
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: `${t('dream_prefix')} ${content.title}`,
+    headline: discoverTitle,
     description: content.short,
-    author: { '@type': 'Organization', name: 'Ruyo.uz' },
-    publisher: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz' },
-    datePublished: '2024-01-01',
+    image: [ogUrl],
+    author: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz' },
+    publisher: {
+      '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz',
+      logo: { '@type': 'ImageObject', url: 'https://ruyo.uz/icon.png' },
+    },
+    datePublished: getSlugDate(slug),
     dateModified: new Date().toISOString().split('T')[0],
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://ruyo.uz/${locale}/sonnik/${dream.slug}` },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
   };
 
   const breadcrumbData = {
@@ -71,8 +131,8 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
-      { '@type': 'ListItem', position: 2, name: tNav('sonnik'), item: `https://ruyo.uz/${locale}/sonnik` },
-      { '@type': 'ListItem', position: 3, name: content.title, item: `https://ruyo.uz/${locale}/sonnik/${dream.slug}` },
+      { '@type': 'ListItem', position: 2, name: tNav('sonnik'), item: locale === 'uz' ? 'https://ruyo.uz/uz/sonnik' : 'https://ruyo.uz/sonnik' },
+      { '@type': 'ListItem', position: 3, name: content.title, item: canonical },
     ],
   };
 
@@ -147,7 +207,7 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
           <span>/</span>
           <Link href={`/${locale}/sonnik`} className="hover:text-stone-700 transition-colors">{tNav('sonnik')}</Link>
           <span>/</span>
-          <span className="text-stone-700">{dream.title}</span>
+          <span className="text-stone-700">{content.title}</span>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -219,6 +279,30 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
               ))}
             </div>
 
+            {/* Sub-page links — programmatic internal linking */}
+            <div className="bg-stone-50 border border-stone-200 rounded-2xl p-6">
+              <h3 className="font-semibold text-stone-900 mb-4">
+                {locale === 'uz' ? 'Batafsil o\'qing:' : 'Читать подробнее:'}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { variant: 'dlya-zhenshchin', emoji: '👩', label: locale === 'uz' ? 'Ayollar uchun' : 'Для женщин', desc: locale === 'uz' ? 'Ayolga xos talqin' : 'Толкование для женщины' },
+                  { variant: 'dlya-muzhchin',   emoji: '👨', label: locale === 'uz' ? 'Erkaklar uchun' : 'Для мужчин', desc: locale === 'uz' ? 'Erkaklarga xos talqin' : 'Толкование для мужчины' },
+                  { variant: 'islamskiy',        emoji: '🕌', label: locale === 'uz' ? 'Islomiy ta\'bir' : 'Исламский сонник', desc: locale === 'uz' ? 'Ibn Sirin bo\'yicha' : 'По Ибн Сирину' },
+                ].map(({ variant, emoji: em, label, desc }) => (
+                  <Link
+                    key={variant}
+                    href={`/${locale}/sonnik/${slug}/${variant}`}
+                    className="flex flex-col items-center text-center p-4 bg-white border border-stone-200 rounded-xl hover:border-violet-300 hover:bg-violet-50 transition-all group"
+                  >
+                    <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">{em}</span>
+                    <span className="font-semibold text-stone-800 text-sm mb-1 group-hover:text-violet-700">{label}</span>
+                    <span className="text-xs text-stone-500">{desc}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             {/* Dream book interpretations */}
             <div className="bg-white rounded-2xl border border-stone-200 p-6 card-shadow">
               <h2 className="font-serif text-xl font-semibold text-stone-900 mb-5">
@@ -226,15 +310,21 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
               </h2>
               <div className="space-y-5">
                 <div className="border-l-4 border-amber-400 pl-4">
-                  <p className="font-semibold text-stone-800 text-sm mb-2">📖 Сонник Миллера</p>
+                  <p className="font-semibold text-stone-800 text-sm mb-2">
+                    {locale === 'uz' ? "📖 Miller ta'birnomasi" : '📖 Сонник Миллера'}
+                  </p>
                   <p className="text-stone-600 text-sm leading-relaxed">{millerText}</p>
                 </div>
                 <div className="border-l-4 border-violet-400 pl-4">
-                  <p className="font-semibold text-stone-800 text-sm mb-2">🔮 Сонник Ванги</p>
+                  <p className="font-semibold text-stone-800 text-sm mb-2">
+                    {locale === 'uz' ? '🔮 Vanga tabirnomasi' : '🔮 Сонник Ванги'}
+                  </p>
                   <p className="text-stone-600 text-sm leading-relaxed">{vangaText}</p>
                 </div>
                 <div className="border-l-4 border-blue-400 pl-4">
-                  <p className="font-semibold text-stone-800 text-sm mb-2">🧠 Толкование Фрейда</p>
+                  <p className="font-semibold text-stone-800 text-sm mb-2">
+                    {locale === 'uz' ? '🧠 Freyd talqini' : '🧠 Толкование Фрейда'}
+                  </p>
                   <p className="text-stone-600 text-sm leading-relaxed">{freudText}</p>
                 </div>
               </div>
@@ -268,34 +358,40 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
               <div className="bg-white rounded-2xl border border-stone-200 p-5 card-shadow">
                 <h3 className="font-semibold text-stone-900 mb-4 text-sm uppercase tracking-wide">{t('similar_dreams')}</h3>
                 <div className="space-y-1">
-                  {relatedDreams.map((r) => (
-                    <Link
-                      key={r.slug}
-                      href={`/${locale}/sonnik/${r.slug}`}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors group"
-                    >
-                      <span className="text-base">🌙</span>
-                      <span className="text-sm text-stone-600 group-hover:text-violet-600 transition-colors">{r.title}</span>
-                    </Link>
-                  ))}
+                  {relatedDreams.map((r) => {
+                    const rTitle = locale === 'uz' ? (dreamsUz[r.slug]?.title ?? r.title) : r.title;
+                    return (
+                      <Link
+                        key={r.slug}
+                        href={`/${locale}/sonnik/${r.slug}`}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors group"
+                      >
+                        <span className="text-base">🌙</span>
+                        <span className="text-sm text-stone-600 group-hover:text-violet-600 transition-colors">{rTitle}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {otherDreams.length > 0 && (
               <div className="bg-white rounded-2xl border border-stone-200 p-5 card-shadow">
-                <h3 className="font-semibold text-stone-900 mb-4 text-sm uppercase tracking-wide">«{dream.letter}»</h3>
+                <h3 className="font-semibold text-stone-900 mb-4 text-sm uppercase tracking-wide">«{uzLetter}»</h3>
                 <div className="space-y-1">
-                  {otherDreams.map((r) => (
-                    <Link
-                      key={r.slug}
-                      href={`/${locale}/sonnik/${r.slug}`}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors group"
-                    >
-                      <span className="text-base">🌙</span>
-                      <span className="text-sm text-stone-600 group-hover:text-violet-600 transition-colors">{r.title}</span>
-                    </Link>
-                  ))}
+                  {otherDreams.map((r) => {
+                    const rTitle = locale === 'uz' ? (dreamsUz[r.slug]?.title ?? r.title) : r.title;
+                    return (
+                      <Link
+                        key={r.slug}
+                        href={`/${locale}/sonnik/${r.slug}`}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors group"
+                      >
+                        <span className="text-base">🌙</span>
+                        <span className="text-sm text-stone-600 group-hover:text-violet-600 transition-colors">{rTitle}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -312,6 +408,37 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
                 {t('horoscope_cta_btn')}
               </Link>
             </div>
+
+            {/* Trending Today */}
+            {trendingDreams.length > 0 && (
+              <div className="bg-white rounded-2xl border border-stone-200 p-5 card-shadow">
+                <h3 className="font-semibold text-stone-900 mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-rose-500" />
+                  {locale === 'uz' ? 'Hozir o\'qilmoqda' : 'Сейчас читают'}
+                </h3>
+                <div className="space-y-1">
+                  {trendingDreams.map((tr) => {
+                    const trTitle = locale === 'uz' ? (dreamsUz[tr.slug]?.title ?? tr.title) : tr.title;
+                    return (
+                      <Link
+                        key={tr.slug}
+                        href={`/${locale}/sonnik/${tr.slug}`}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors group"
+                      >
+                        <span className="text-base shrink-0">🔥</span>
+                        <span className="text-sm text-stone-600 group-hover:text-violet-600 transition-colors line-clamp-1">{trTitle}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <Link
+                  href={`/${locale}/sonnik`}
+                  className="mt-3 block text-center text-xs text-violet-600 hover:text-violet-700 font-medium"
+                >
+                  {locale === 'uz' ? 'Barcha tushlar →' : 'Все сны →'}
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -3,20 +3,54 @@ import Link from 'next/link';
 import { ORIGIN_LABELS } from '@/data/names';
 import { fetchNameBySlug, fetchRelatedNames } from '@/lib/names-db';
 import { getTranslations } from 'next-intl/server';
+import { getNameDiscoverTitle, getNameDiscoverDescription, getSlugDate, ogImageUrl } from '@/lib/discover';
 import { Heart, Star, Hash } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const revalidate = 3600;
 
+const NAME_ORIGIN_EMOJI: Record<string, string> = {
+  uzbek: '🏔️', arabic: '🌙', persian: '🌸', turkic: '⭐',
+  slavic: '🌾', greek: '🏛️', latin: '🦅', hebrew: '✡️', scandinavian: '❄️',
+};
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const name = await fetchNameBySlug(slug);
+  const name = await fetchNameBySlug(slug, locale);
   if (!name) return {};
-  const t = await getTranslations({ locale, namespace: 'names' });
+
+  const emoji = NAME_ORIGIN_EMOJI[name.origin] ?? '✨';
+  const discoverTitle = getNameDiscoverTitle(name.name, slug, locale);
+  const discoverDesc  = getNameDiscoverDescription(name.meaning, name.name, locale);
+  const imageUrl = ogImageUrl({ title: discoverTitle, emoji, type: 'name', locale });
+  const canonical = locale === 'uz' ? `https://ruyo.uz/uz/imena/${slug}` : `https://ruyo.uz/imena/${slug}`;
+
   return {
-    title: `${t('meaning')} ${name.name}`,
-    description: name.meaning.slice(0, 120),
-    alternates: { canonical: `https://ruyo.uz/${locale}/imena/${slug}` },
+    title: discoverTitle,
+    description: discoverDesc,
+    alternates: {
+      canonical,
+      languages: {
+        ru: `https://ruyo.uz/imena/${slug}`,
+        uz: `https://ruyo.uz/uz/imena/${slug}`,
+      },
+    },
+    openGraph: {
+      title: discoverTitle,
+      description: discoverDesc,
+      type: 'article',
+      url: canonical,
+      siteName: 'Ruyo.uz',
+      publishedTime: getSlugDate(slug),
+      modifiedTime: new Date().toISOString().split('T')[0],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: name.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: discoverTitle,
+      description: discoverDesc,
+      images: [imageUrl],
+    },
   };
 }
 
@@ -27,17 +61,74 @@ const ORIGIN_EMOJI: Record<string, string> = {
 
 export default async function NamePage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
-  const name = await fetchNameBySlug(slug);
+  const name = await fetchNameBySlug(slug, locale);
   if (!name) notFound();
 
   const t = await getTranslations({ locale, namespace: 'names' });
   const tNav = await getTranslations({ locale, namespace: 'nav' });
   const localeKey = locale as 'ru' | 'uz';
 
-  const relatedNames = await fetchRelatedNames(name.origin, name.slug, 6);
+  const relatedNames = await fetchRelatedNames(name.origin, name.slug, 6, locale);
   const originLabel = ORIGIN_LABELS[name.origin][localeKey];
 
+  const canonical = locale === 'uz' ? `https://ruyo.uz/uz/imena/${name.slug}` : `https://ruyo.uz/imena/${name.slug}`;
+  const discoverTitle = getNameDiscoverTitle(name.name, name.slug, locale);
+  const discoverDesc  = getNameDiscoverDescription(name.meaning, name.name, locale);
+  const ogUrl = ogImageUrl({ title: discoverTitle, emoji: ORIGIN_EMOJI[name.origin] ?? '✨', type: 'name', locale });
+
+  const faqs = locale === 'uz' ? [
+    { question: `${name.name} ismi nima anglatadi?`,                  answer: name.meaning },
+    { question: `${name.name} ismi ega bo'lgan xarakter qanday?`,     answer: name.character },
+    { question: `${name.name} ismining kelib chiqishi qaysi?`,         answer: originLabel },
+    { question: `${name.name} ismining baxt raqamlari qanday?`,        answer: name.luckyNumbers.join(', ') },
+  ] : [
+    { question: `Что означает имя ${name.name}?`,                     answer: name.meaning },
+    { question: `Какой характер у людей с именем ${name.name}?`,      answer: name.character },
+    { question: `Какое происхождение у имени ${name.name}?`,          answer: `Происхождение: ${originLabel}` },
+    { question: `Счастливые числа имени ${name.name}?`,               answer: name.luckyNumbers.join(', ') },
+  ];
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: discoverTitle,
+    description: discoverDesc,
+    image: [ogUrl],
+    author: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz' },
+    publisher: {
+      '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz',
+      logo: { '@type': 'ImageObject', url: 'https://ruyo.uz/icon.png' },
+    },
+    datePublished: getSlugDate(name.slug),
+    dateModified: new Date().toISOString().split('T')[0],
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  };
+
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
+      { '@type': 'ListItem', position: 2, name: tNav('names'), item: locale === 'uz' ? 'https://ruyo.uz/uz/imena' : 'https://ruyo.uz/imena' },
+      { '@type': 'ListItem', position: 3, name: name.name, item: canonical },
+    ],
+  };
+
+  const faqData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  };
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqData) }} />
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
       {/* Breadcrumb */}
@@ -180,5 +271,6 @@ export default async function NamePage({ params }: { params: Promise<{ locale: s
         </div>
       </div>
     </div>
+    </>
   );
 }
