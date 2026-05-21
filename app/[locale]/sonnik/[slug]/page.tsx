@@ -106,6 +106,7 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
     return true;
   }).slice(0, 6);
 
+  const canonical     = locale === 'uz' ? `https://ruyo.uz/uz/sonnik/${slug}` : `https://ruyo.uz/sonnik/${slug}`;
   const discoverTitle = getDreamDiscoverTitle(content.title, slug, locale);
   const dreamEmoji    = getDreamEmoji(slug, dream.tags);
   const ogUrl         = ogImageUrl({ title: discoverTitle, emoji: dreamEmoji, type: 'dream', locale });
