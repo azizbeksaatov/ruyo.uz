@@ -45,3 +45,13 @@ export const ZODIAC_SIGNS = [
 export const DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 export const ALPHABET_RU = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЭЮЯ'.split('');
+
+export function getUzFirstLetter(title: string): string {
+  if (!title) return '';
+  const ch0 = title.charAt(0).toUpperCase();
+  const ch1 = title.charAt(1);
+  const isApos = (c: string) => c === "'" || c === 'ʻ' || c === '‘' || c === '’';
+  if (ch0 === 'O' && isApos(ch1)) return "O'";
+  if (ch0 === 'G' && isApos(ch1)) return "G'";
+  return ch0;
+}
