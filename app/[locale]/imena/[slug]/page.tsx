@@ -5,6 +5,7 @@ import { fetchNameBySlug, fetchRelatedNames } from '@/lib/names-db';
 import { getTranslations } from 'next-intl/server';
 import { getNameDiscoverTitle, getNameDiscoverDescription, getSlugDate, ogImageUrl } from '@/lib/discover';
 import { Heart, Star, Hash } from 'lucide-react';
+import ShareButtons from '@/components/ShareButtons';
 import type { Metadata } from 'next';
 
 export const revalidate = 3600;
@@ -168,6 +169,7 @@ export default async function NamePage({ params }: { params: Promise<{ locale: s
           <div className="bg-white rounded-2xl border border-stone-200 p-6 card-shadow">
             <h2 className="font-serif text-xl font-semibold text-stone-900 mb-4">{t('meaning')}</h2>
             <p className="text-stone-600 leading-relaxed">{name.meaning}</p>
+            <ShareButtons url={canonical} title={discoverTitle} locale={locale} />
           </div>
 
           {/* Character */}

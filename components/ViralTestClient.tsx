@@ -5,16 +5,19 @@ import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { ViralTest, TestResult } from '@/data/tests';
 import { testTranslationsUz } from '@/data/testTranslationsUz';
-import { Share2, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import ShareButtons from '@/components/ShareButtons';
 
 export default function ViralTestClient({
   test,
   locale,
   backLabel,
+  pageUrl,
 }: {
   test: ViralTest;
   locale: string;
   backLabel: string;
+  pageUrl: string;
 }) {
   const t = useTranslations('tests');
   const isUz = locale === 'uz';
@@ -52,17 +55,6 @@ export default function ViralTestClient({
     setAnswers([]);
     setResult(null);
     setStarted(false);
-  };
-
-  const handleShare = async () => {
-    const resultTitle = result ? (getResultUz(result.id)?.title ?? result.title) : '';
-    const text = `${title}\n${t('share_text')} ${resultTitle}\n\nruyo.uz`;
-    if (navigator.share) {
-      await navigator.share({ title, text });
-    } else {
-      await navigator.clipboard.writeText(text);
-      alert(t('copied'));
-    }
   };
 
   /* ── Intro screen ── */
@@ -110,21 +102,18 @@ export default function ViralTestClient({
         <p className="text-stone-400 text-sm uppercase tracking-wide mb-2">{t('your_result')}</p>
         <h2 className="font-serif text-3xl font-semibold text-stone-900 mb-5">{resultTitle}</h2>
 
-        <div className="bg-stone-50 rounded-2xl p-6 mb-7 text-left">
+        <div className="bg-stone-50 rounded-2xl p-6 mb-5 text-left">
           <p className="text-stone-700 leading-relaxed">{resultDesc}</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
-          <button
-            onClick={handleShare}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-medium transition-colors"
-          >
-            <Share2 className="w-4 h-4" />
-            {t('share')}
-          </button>
+        <div className="mb-6">
+          <ShareButtons url={pageUrl} title={`${title} — ${resultTitle}`} locale={locale} />
+        </div>
+
+        <div className="flex justify-center max-w-sm mx-auto">
           <button
             onClick={handleReset}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-medium transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-medium transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             {t('retake')}

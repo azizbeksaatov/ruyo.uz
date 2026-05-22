@@ -8,6 +8,7 @@ import { getDreamDiscoverTitle, getDreamDiscoverDescription, getDreamEmoji, getS
 import { User, Users, Calendar, TrendingUp } from 'lucide-react';
 import type { Metadata } from 'next';
 import DreamAiInterpreter from '@/components/DreamAiInterpreter';
+import ShareButtons from '@/components/ShareButtons';
 
 export async function generateStaticParams() {
   return dreams.map((dream) => ({ slug: dream.slug }));
@@ -228,6 +229,7 @@ export default async function DreamPage({ params }: { params: Promise<{ locale: 
                   <p className="text-stone-600 text-lg leading-relaxed">{content.short}</p>
                 </div>
               </div>
+              <ShareButtons url={canonical} title={discoverTitle} locale={locale} />
             </div>
 
             {/* Full interpretation */}

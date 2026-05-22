@@ -23,6 +23,7 @@ export default async function TestPage({ params }: { params: Promise<{ locale: s
 
   const tNav = await getTranslations({ locale, namespace: 'nav' });
   const tTests = await getTranslations({ locale, namespace: 'tests' });
+  const pageUrl = locale === 'uz' ? `https://ruyo.uz/uz/testy/${slug}` : `https://ruyo.uz/testy/${slug}`;
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -33,7 +34,7 @@ export default async function TestPage({ params }: { params: Promise<{ locale: s
         <span>/</span>
         <span className="text-stone-700 line-clamp-1">{test.title}</span>
       </nav>
-      <ViralTestClient test={test} locale={locale} backLabel={tTests('back')} />
+      <ViralTestClient test={test} locale={locale} backLabel={tTests('back')} pageUrl={pageUrl} />
     </div>
   );
 }
