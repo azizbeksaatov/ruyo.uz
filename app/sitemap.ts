@@ -1,15 +1,22 @@
 import { MetadataRoute } from 'next';
 import { dreams } from '@/data/dreams';
 import { zodiacSigns } from '@/data/horoscopes';
-import { names } from '@/data/names';
 import { viralTests } from '@/data/tests';
 import { getSlugDate, VARIANTS } from '@/lib/discover';
+import { createServerSupabase } from '@/lib/supabase';
 
 const BASE_URL = 'https://ruyo.uz';
 const locales = ['ru', 'uz'];
 const NOW = new Date();
 
-export default function sitemap(): MetadataRoute.Sitemap {
+async function fetchNameSlugs(): Promise<string[]> {
+  const { data } = await createServerSupabase()
+    .from('names').select('slug').eq('status', 'approved').order('slug');
+  return (data ?? []).map((r: { slug: string }) => r.slug);
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const nameSlugs = await fetchNameSlugs();
   const entries: MetadataRoute.Sitemap = [];
 
   for (const locale of locales) {
@@ -54,11 +61,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       });
     }
 
-    // Name pages
-    for (const name of names) {
+    // Name pages — from Supabase (all approved names)
+    for (const slug of nameSlugs) {
       entries.push({
-        url: `${BASE_URL}${prefix}/imena/${name.slug}`,
-        lastModified: new Date(getSlugDate(name.slug)),
+        url: `${BASE_URL}${prefix}/imena/${slug}`,
+        lastModified: new Date(getSlugDate(slug)),
         changeFrequency: 'monthly',
         priority: 0.65,
       });

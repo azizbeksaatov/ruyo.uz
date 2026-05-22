@@ -13,7 +13,14 @@ import NameSubmitForm from '@/components/NameSubmitForm';
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'names' });
-  return { title: t('title'), description: t('subtitle') };
+  return {
+    title: t('title'),
+    description: t('subtitle'),
+    alternates: {
+      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/imena' : 'https://ruyo.uz/imena',
+      languages: { ru: 'https://ruyo.uz/imena', uz: 'https://ruyo.uz/uz/imena' },
+    },
+  };
 }
 
 const origins: NameOrigin[] = ['uzbek', 'arabic', 'persian', 'turkic', 'slavic', 'greek', 'latin', 'hebrew', 'scandinavian'];

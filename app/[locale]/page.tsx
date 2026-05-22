@@ -12,7 +12,32 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: 'home' });
   const trendingDreams = TRENDING_DREAMS.map((slug) => dreams.find((d) => d.slug === slug)).filter(Boolean);
 
+  const siteUrl = locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz';
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Ruyo.uz',
+    url: 'https://ruyo.uz',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${siteUrl}/sonnik?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Ruyo.uz',
+    url: 'https://ruyo.uz',
+    logo: { '@type': 'ImageObject', url: 'https://ruyo.uz/logo.png' },
+    sameAs: ['https://t.me/ruyouz_ru'],
+  };
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-20">
 
       {/* ── Hero ── */}
@@ -170,5 +195,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
     </div>
+    </>
   );
 }

@@ -15,7 +15,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('title'),
     description: t('subtitle'),
-    alternates: { canonical: `https://ruyo.uz/${locale}/sonnik` },
+    alternates: {
+      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/sonnik' : 'https://ruyo.uz/sonnik',
+      languages: { ru: 'https://ruyo.uz/sonnik', uz: 'https://ruyo.uz/uz/sonnik' },
+    },
   };
 }
 
