@@ -9,11 +9,11 @@ const KEYWORD_INTERPRETATIONS: Record<string, string> = {
   дом: 'Ваш сон о доме — отражение вашего психологического состояния. Детали говорят о вашем отношении к семье и безопасности.',
 };
 
-function generateRuleBasedInterpretation(dreamText: string, context: string): string {
+function generateRuleBasedInterpretation(dreamText: string): string {
   const text = dreamText.toLowerCase();
 
   for (const [keyword, interpretation] of Object.entries(KEYWORD_INTERPRETATIONS)) {
-    if (text.includes(keyword) || context.toLowerCase().includes(keyword)) {
+    if (text.includes(keyword)) {
       return interpretation;
     }
   }
@@ -22,22 +22,21 @@ function generateRuleBasedInterpretation(dreamText: string, context: string): st
     ? 'Сон несёт тревожные эмоции, что говорит о стрессе в реальной жизни.'
     : text.includes('радост') || text.includes('счаст') || text.includes('смеял')
     ? 'Позитивные эмоции во сне — хороший знак. Подсознание посылает вам оптимистичный сигнал.'
-    : 'Ваш сон содержит нейтральные эмоции.';
+    : 'Ваш сон несёт нейтральный эмоциональный фон.';
 
   const hasOtherPeople = text.includes('люди') || text.includes('человек') || text.includes('друг') || text.includes('родител') || text.includes('семья');
   const socialPart = hasOtherPeople
     ? ' Присутствие других людей в сне указывает на важность социальных связей в данный момент.'
     : '';
 
-  return `${emotions}${socialPart} Контекст "${context}" в вашем сне символизирует важный аспект вашей жизни, требующий внимания. Прислушайтесь к своим ощущениям после пробуждения — они подскажут правильное направление.`;
+  return `${emotions}${socialPart} Прислушайтесь к своим ощущениям после пробуждения — они подскажут правильное направление.`;
 }
 
 export async function POST(req: NextRequest) {
-  let dream: string, context: string;
+  let dream: string;
   try {
     const body = await req.json();
     dream = body.dream;
-    context = body.context ?? '';
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
@@ -56,9 +55,8 @@ export async function POST(req: NextRequest) {
       const result = await model.generateContent(
         `Ты — опытный толкователь снов для аудитории из Узбекистана и СНГ.
 Дай персональное толкование сна (2-3 абзаца, не более 200 слов).
-Контекст сна: "${context}".
 Описание сна пользователя: "${dream}".
-Пиши на русском языке, тепло и доступно.`
+Пиши на русском языке, тепло и доступно. Толкуй только то, что описал пользователь.`
       );
 
       const interpretation = result.response.text();
@@ -68,6 +66,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const interpretation = generateRuleBasedInterpretation(dream, context);
+  const interpretation = generateRuleBasedInterpretation(dream);
   return NextResponse.json({ interpretation });
 }
