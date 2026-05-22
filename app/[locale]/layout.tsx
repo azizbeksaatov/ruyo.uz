@@ -43,6 +43,7 @@ export async function generateMetadata({
       images: [{ url: 'https://ruyo.uz/api/og?title=Ruyo.uz+%E2%80%94+%D0%A1%D0%BE%D0%BD%D0%BD%D0%B8%D0%BA+%D0%B8+%D0%B3%D0%BE%D1%80%D0%BE%D1%81%D0%BA%D0%BE%D0%BF&emoji=%F0%9F%8C%99&type=dream&locale=' + locale, width: 1200, height: 630, alt: 'Ruyo.uz' }],
     },
     robots: { index: true, follow: true },
+    verification: { google: 'ZzuUJFm-AAc7zr0PwjFu5_Qd40Nykq7JgXTPvb8Jjc8' },
   };
 }
 

@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { viralTests } from '@/data/tests';
+import { testTranslationsUz } from '@/data/testTranslationsUz';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -15,6 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function TestsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'tests' });
+  const isUz = locale === 'uz';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -31,26 +33,32 @@ export default async function TestsPage({ params }: { params: Promise<{ locale: 
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {viralTests.map((test) => (
-          <Link
-            key={test.slug}
-            href={`/${locale}/testy/${test.slug}`}
-            className="group p-7 rounded-3xl bg-white border border-stone-200 hover:border-pink-200 hover:shadow-lg transition-all card-shadow flex flex-col"
-          >
-            <div className="text-5xl mb-4">{test.emoji}</div>
-            <span className="inline-block text-xs text-pink-600 font-medium bg-pink-50 px-3 py-1 rounded-full mb-3 self-start">
-              {test.category}
-            </span>
-            <h2 className="font-serif text-xl font-semibold text-stone-900 mb-2 group-hover:text-pink-700 transition-colors leading-snug">
-              {test.title}
-            </h2>
-            <p className="text-sm text-stone-500 leading-relaxed flex-1">{test.description}</p>
-            <div className="mt-5 flex items-center gap-2 text-sm font-medium text-pink-600">
-              {t('take_test')}
-              <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
-            </div>
-          </Link>
-        ))}
+        {viralTests.map((test) => {
+          const uz = isUz ? testTranslationsUz[test.slug] : null;
+          const title = uz?.title ?? test.title;
+          const description = uz?.description ?? test.description;
+          const category = uz?.category ?? test.category;
+          return (
+            <Link
+              key={test.slug}
+              href={`/${locale}/testy/${test.slug}`}
+              className="group p-7 rounded-3xl bg-white border border-stone-200 hover:border-pink-200 hover:shadow-lg transition-all card-shadow flex flex-col"
+            >
+              <div className="text-5xl mb-4">{test.emoji}</div>
+              <span className="inline-block text-xs text-pink-600 font-medium bg-pink-50 px-3 py-1 rounded-full mb-3 self-start">
+                {category}
+              </span>
+              <h2 className="font-serif text-xl font-semibold text-stone-900 mb-2 group-hover:text-pink-700 transition-colors leading-snug">
+                {title}
+              </h2>
+              <p className="text-sm text-stone-500 leading-relaxed flex-1">{description}</p>
+              <div className="mt-5 flex items-center gap-2 text-sm font-medium text-pink-600">
+                {t('take_test')}
+                <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
