@@ -94,9 +94,16 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-stone-400">
-          <span>© {year} Ruyo.uz — {t('rights')}</span>
-          <span>{t('made_in_uz')}</span>
+        <div className="mt-10 pt-6 border-t border-stone-100 space-y-4">
+          <p className="text-xs text-stone-400 leading-relaxed text-center">
+            {locale === 'uz'
+              ? 'Ruyo.uz saytidagi barcha ma\'lumotlar — tush ta\'birlari, goroskoplar va ism ma\'nolari — faqat ko\'ngilochar va ma\'lumot berish maqsadida taqdim etiladi. Ular muhim hayotiy qarorlar uchun asos bo\'la olmaydi. Istalgan muammo bo\'yicha mutaxassis bilan maslahatlashing.'
+              : 'Все материалы сайта — толкования снов, гороскопы и значения имён — предоставляются исключительно в развлекательных и информационных целях. Они не могут служить основанием для принятия важных жизненных решений. При необходимости обращайтесь к квалифицированным специалистам.'}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-stone-400">
+            <span>© {year} Ruyo.uz — {t('rights')}</span>
+            <span>{t('made_in_uz')}</span>
+          </div>
         </div>
       </div>
     </footer>
