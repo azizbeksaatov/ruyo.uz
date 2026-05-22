@@ -25,9 +25,19 @@ export default function Header() {
   ];
 
   const switchLocale = (newLocale: string) => {
-    const segments = pathname.split('/');
-    segments[1] = newLocale;
-    router.push(segments.join('/') || `/${newLocale}`);
+    // localePrefix: 'as-needed' — default locale 'ru' has no /ru/ prefix in URLs
+    // Russian pathname: '/sonnik/bolezn' (no /ru/ prefix)
+    // Uzbek pathname:  '/uz/sonnik/bolezn'
+    if (locale === 'ru') {
+      // Prepend new locale to the prefix-less path
+      const path = pathname === '/' ? '' : pathname;
+      router.push(`/${newLocale}${path}`);
+    } else {
+      // Replace existing locale prefix in segments[1]
+      const segments = pathname.split('/');
+      segments[1] = newLocale;
+      router.push(segments.join('/') || `/${newLocale}`);
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -40,13 +50,13 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#060e30] via-[#0d1f5e] to-[#071540] backdrop-blur-sm border-b border-white/10 shadow-lg shadow-indigo-950/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center">
-            <Image src="/logo.png" alt="Ruyo.uz" width={134} height={36} className="h-9 w-auto" priority />
+            <Image src="/logo_light.png" alt="Ruyo.uz" width={134} height={36} className="h-9 w-auto" priority />
           </Link>
 
           {/* Desktop nav */}
@@ -58,8 +68,8 @@ export default function Header() {
                 className={cn(
                   'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                   pathname.startsWith(link.href)
-                    ? 'bg-violet-50 text-violet-700'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
                 )}
               >
                 {link.label}
@@ -71,13 +81,13 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 rounded-lg text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+              className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             >
               <Search className="w-5 h-5" />
             </button>
 
             {/* Locale switcher */}
-            <div className="hidden sm:flex items-center bg-stone-100 rounded-lg p-1 gap-0.5">
+            <div className="hidden sm:flex items-center bg-white/10 rounded-lg p-1 gap-0.5">
               {['ru', 'uz'].map((loc) => (
                 <button
                   key={loc}
@@ -85,8 +95,8 @@ export default function Header() {
                   className={cn(
                     'px-3 py-1 rounded-md text-xs font-semibold uppercase transition-colors',
                     locale === loc
-                      ? 'bg-white text-stone-900 shadow-sm'
-                      : 'text-stone-500 hover:text-stone-700'
+                      ? 'bg-white text-indigo-900 shadow-sm'
+                      : 'text-white/60 hover:text-white'
                   )}
                 >
                   {loc}
@@ -97,7 +107,7 @@ export default function Header() {
             {/* Hamburger */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-lg text-stone-500 hover:bg-stone-100 transition-colors"
+              className="md:hidden p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             >
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -108,14 +118,14 @@ export default function Header() {
         {searchOpen && (
           <div className="pb-3">
             <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('search')}
                 autoFocus
-                className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 text-sm"
+                className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/40 focus:ring-2 focus:ring-white/10 text-sm"
               />
             </form>
           </div>
@@ -123,7 +133,7 @@ export default function Header() {
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden pb-4 border-t border-stone-100 mt-2 pt-4">
+          <div className="md:hidden pb-4 border-t border-white/10 mt-2 pt-4">
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
@@ -133,8 +143,8 @@ export default function Header() {
                   className={cn(
                     'px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
                     pathname.startsWith(link.href)
-                      ? 'bg-violet-50 text-violet-700'
-                      : 'text-stone-600 hover:bg-stone-100'
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   )}
                 >
                   {link.label}
@@ -147,7 +157,7 @@ export default function Header() {
                     onClick={() => { switchLocale(loc); setMenuOpen(false); }}
                     className={cn(
                       'px-3 py-1.5 rounded-lg text-xs font-semibold uppercase transition-colors',
-                      locale === loc ? 'bg-violet-600 text-white' : 'bg-stone-100 text-stone-600'
+                      locale === loc ? 'bg-white text-indigo-900' : 'bg-white/10 text-white/70 hover:text-white'
                     )}
                   >
                     {loc}

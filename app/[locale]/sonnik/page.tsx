@@ -1,8 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { dreams, searchDreams, getDreamsByLetter } from '@/data/dreams';
+import { redirect } from 'next/navigation';
+import { dreams } from '@/data/dreams';
 import { dreamsUz } from '@/data/dreams-uz';
-import { ALPHABET_RU } from '@/lib/utils';
+import { ALPHABET_RU, getUzFirstLetter } from '@/lib/utils';
 import { Search } from 'lucide-react';
 import type { Metadata } from 'next';
 
@@ -27,14 +28,49 @@ export default async function SonnikPage({
 }) {
   const { locale } = await params;
   const { q, letter } = await searchParams;
+
+  // Auto-switch locale based on script: Latin on RU page → UZ; Cyrillic on UZ page → RU
+  if (q?.trim()) {
+    const hasCyr = /[Ѐ-ӿ]/.test(q);
+    const hasLat = /[a-zA-Z]/.test(q);
+    if (locale === 'ru' && hasLat && !hasCyr) redirect(`/uz/sonnik?q=${encodeURIComponent(q)}`);
+    if (locale === 'uz' && hasCyr)           redirect(`/sonnik?q=${encodeURIComponent(q)}`);
+  }
+
   const t = await getTranslations({ locale, namespace: 'sonnik' });
 
-  const displayDreams = (q
-    ? searchDreams(q)
-    : letter
-    ? getDreamsByLetter(letter.toUpperCase())
-    : dreams
-  ).sort((a, b) => a.title.localeCompare(b.title, 'ru'));
+  // Deduplicate dreams by slug (dreams array has duplicate entries)
+  const seenSlugs = new Set<string>();
+  const uniqueDreams = dreams.filter(d => {
+    if (seenSlugs.has(d.slug)) return false;
+    seenSlugs.add(d.slug);
+    return true;
+  });
+
+  // Build UZ alphabet from actual translated titles
+  const uzAlphabet = [...new Set(
+    uniqueDreams.map(d => getUzFirstLetter(dreamsUz[d.slug]?.title ?? d.title))
+  )].filter(Boolean).sort();
+
+  const displayDreams = (
+    q
+      ? uniqueDreams.filter(d => {
+          const title = locale === 'uz' ? (dreamsUz[d.slug]?.title ?? d.title) : d.title;
+          const tags = locale === 'uz' ? (dreamsUz[d.slug]?.tags ?? d.tags) : d.tags;
+          const ql = q.toLowerCase();
+          return title.toLowerCase().includes(ql) || tags.some(t => t.toLowerCase().includes(ql));
+        })
+      : letter && locale === 'uz'
+      ? uniqueDreams.filter(d => getUzFirstLetter(dreamsUz[d.slug]?.title ?? d.title) === letter)
+      : letter
+      ? uniqueDreams.filter(d => d.title.charAt(0).toUpperCase() === letter.toUpperCase())
+      : uniqueDreams
+  ).sort((a, b) => {
+    if (locale === 'uz') {
+      return (dreamsUz[a.slug]?.title ?? a.title).localeCompare(dreamsUz[b.slug]?.title ?? b.title);
+    }
+    return a.title.localeCompare(b.title, 'ru');
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -76,11 +112,11 @@ export default async function SonnikPage({
         >
           {t('alphabet_all')}
         </a>
-        {ALPHABET_RU.map((char) => (
+        {(locale === 'uz' ? uzAlphabet : ALPHABET_RU).map((char) => (
           <a
             key={char}
             href={`/${locale}/sonnik?letter=${encodeURIComponent(char)}`}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${letter?.toUpperCase() === char ? 'bg-violet-600 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:border-violet-300 hover:text-violet-600'}`}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${letter === char ? 'bg-violet-600 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:border-violet-300 hover:text-violet-600'}`}
           >
             {char}
           </a>
@@ -89,7 +125,11 @@ export default async function SonnikPage({
 
       {(q || letter) && (
         <p className="text-stone-500 text-sm mb-6">
-          {q ? t('search_results', { q }) : `Буква «${letter?.toUpperCase()}»:`}{' '}
+          {q
+            ? t('search_results', { q })
+            : locale === 'uz'
+            ? `«${letter}» harfidan boshlanuvchi:`
+            : `Буква «${letter?.toUpperCase()}»:`}{' '}
           <span className="font-medium text-stone-900">{displayDreams.length}</span> {t('dreams_suffix')}
         </p>
       )}

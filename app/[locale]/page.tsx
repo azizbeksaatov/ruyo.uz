@@ -160,7 +160,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <p className="text-stone-400">{t('telegram_desc')}</p>
         </div>
         <a
-          href="https://t.me/ruyo_uz"
+          href={locale === 'uz' ? 'https://t.me/ruyo_uz' : 'https://t.me/ruyouz_ru'}
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 flex items-center gap-2 px-6 py-3 bg-white text-stone-900 hover:bg-stone-100 rounded-xl font-semibold transition-colors"

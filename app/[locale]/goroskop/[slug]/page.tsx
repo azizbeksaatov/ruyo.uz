@@ -2,10 +2,19 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getSignBySlug, getHoroscopeForToday, zodiacSigns } from '@/data/horoscopes';
 import { weeklyHoroscopes, monthlyHoroscopes } from '@/data/horoscopesExtended';
+import { zodiacSignsUz, dailyPoolUz, weeklyHoroscopesUz, monthlyHoroscopesUz } from '@/data/horoscopes-uz';
 import { getTranslations } from 'next-intl/server';
+import { getHoroscopeDiscoverTitle, getSlugDate, ogImageUrl } from '@/lib/discover';
 import { Heart, DollarSign, Activity, Lightbulb } from 'lucide-react';
 import type { Metadata } from 'next';
 import type { ReactElement } from 'react';
+
+function getDayIndex() {
+  return Math.floor(Date.now() / 86400000) % 4;
+}
+function getWeekIndex() {
+  return Math.floor(Date.now() / 604800000) % 4;
+}
 
 export async function generateStaticParams() {
   const signParams = zodiacSigns.map((s) => ({ slug: s.slug }));
@@ -18,10 +27,42 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const sign = getSignBySlug(slug);
   const t = await getTranslations({ locale, namespace: 'goroskop' });
   if (!sign) return { title: t('title') };
+
+  const signName = locale === 'uz' ? sign.uz : sign.ru;
+  const discoverTitle = getHoroscopeDiscoverTitle(signName, slug, locale);
+  const discoverDesc  = locale === 'uz'
+    ? `${signName} burji: muhabbat, moliya va sog'liq bo'yicha bugungi prognoz. ${sign.emoji} Ruyo.uz`
+    : `${signName}: прогноз на сегодня — любовь, финансы, здоровье. ${sign.emoji} Ruyo.uz`;
+  const imageUrl = ogImageUrl({ title: discoverTitle, emoji: sign.emoji, type: 'horoscope', locale });
+  const canonical = locale === 'uz' ? `https://ruyo.uz/uz/goroskop/${slug}` : `https://ruyo.uz/goroskop/${slug}`;
+  const today = new Date().toISOString().split('T')[0];
+
   return {
-    title: `${t('title')} ${locale === 'uz' ? sign.uz : sign.ru} — ${t('today')}`,
-    description: `${locale === 'uz' ? sign.uz : sign.ru}: ${t('love_label')}, ${t('finance_label')}, ${t('health_label')}. Ruyo.uz`,
-    alternates: { canonical: `https://ruyo.uz/${locale}/goroskop/${slug}` },
+    title: discoverTitle,
+    description: discoverDesc,
+    alternates: {
+      canonical,
+      languages: {
+        ru: `https://ruyo.uz/goroskop/${slug}`,
+        uz: `https://ruyo.uz/uz/goroskop/${slug}`,
+      },
+    },
+    openGraph: {
+      title: discoverTitle,
+      description: discoverDesc,
+      type: 'article',
+      url: canonical,
+      siteName: 'Ruyo.uz',
+      publishedTime: today,
+      modifiedTime: today,
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: signName }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: discoverTitle,
+      description: discoverDesc,
+      images: [imageUrl],
+    },
   };
 }
 
@@ -44,7 +85,25 @@ export default async function HoroscopePage({ params }: { params: Promise<{ loca
   const tNav = await getTranslations({ locale, namespace: 'nav' });
   const signName = locale === 'uz' ? sign.uz : sign.ru;
 
-  const h = getHoroscopeForToday(slug);
+  const hRu = getHoroscopeForToday(slug);
+  const uzMeta = zodiacSignsUz[slug];
+  const uzDaily = dailyPoolUz[slug];
+  const uzWeekly = weeklyHoroscopesUz[slug];
+  const uzMonthly = monthlyHoroscopesUz[slug];
+
+  // Locale-aware content helpers
+  const dates = locale === 'uz' && uzMeta ? uzMeta.datesUz : sign.dates;
+  const element = locale === 'uz' && uzMeta ? uzMeta.elementUz : sign.element;
+  const planet = locale === 'uz' && uzMeta ? uzMeta.planetUz : sign.planet;
+  const traits = locale === 'uz' && uzMeta ? uzMeta.traitsUz : sign.traits;
+  const description = locale === 'uz' && uzMeta ? uzMeta.descriptionUz : sign.description;
+  const luckyColor = locale === 'uz' && uzWeekly ? uzWeekly.luckyColor : hRu.luckyColor;
+  const generalText = locale === 'uz' && uzDaily ? uzDaily[getDayIndex()] : hRu.general;
+  const loveText = locale === 'uz' ? (uzWeekly?.love ?? hRu.love) : hRu.love;
+  const financeText = locale === 'uz' ? (uzWeekly?.finance ?? hRu.finance) : hRu.finance;
+  const healthText = locale === 'uz' ? (uzWeekly?.health ?? hRu.health) : hRu.health;
+  const adviceText = locale === 'uz' ? (uzMonthly?.advice ?? uzWeekly?.advice ?? hRu.advice) : hRu.advice;
+
   const otherSigns = zodiacSigns.filter((s) => s.slug !== slug).slice(0, 8);
 
   const breadcrumbData = {
@@ -89,19 +148,19 @@ export default async function HoroscopePage({ params }: { params: Promise<{ loca
         <div className="text-7xl mb-4">{sign.emoji}</div>
         <p className="text-amber-600 text-sm font-medium uppercase tracking-wide mb-1">{t('hero_label')}</p>
         <h1 className="font-serif text-3xl font-semibold text-stone-900 mb-2">{signName}</h1>
-        <p className="text-stone-500 text-sm mb-5">{sign.dates}</p>
+        <p className="text-stone-500 text-sm mb-5">{dates}</p>
         <div className="flex flex-wrap justify-center gap-2">
           <span className="px-3 py-1 rounded-full bg-stone-100 text-stone-600 text-sm">
-            {sign.element}
+            {element}
           </span>
           <span className="px-3 py-1 rounded-full bg-stone-100 text-stone-600 text-sm">
-            {sign.planet}
+            {planet}
           </span>
           <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm">
-            🍀 {h.luckyNumber}
+            🍀 {hRu.luckyNumber}
           </span>
           <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm capitalize">
-            🎨 {h.luckyColor}
+            🎨 {luckyColor}
           </span>
         </div>
       </div>
@@ -109,15 +168,15 @@ export default async function HoroscopePage({ params }: { params: Promise<{ loca
       {/* General */}
       <div className="bg-amber-50 border border-amber-100 rounded-2xl p-6 mb-5">
         <h2 className="font-semibold text-stone-900 mb-3">{t('general_forecast')}</h2>
-        <p className="text-stone-700 leading-relaxed">{h.general}</p>
+        <p className="text-stone-700 leading-relaxed">{generalText}</p>
       </div>
 
       {/* 3 spheres */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
         {[
-          { icon: Heart,      color: 'rose',  label: t('love_label'),    text: h.love },
-          { icon: DollarSign, color: 'green', label: t('finance_label'), text: h.finance },
-          { icon: Activity,   color: 'blue',  label: t('health_label'),  text: h.health },
+          { icon: Heart,      color: 'rose',  label: t('love_label'),    text: loveText },
+          { icon: DollarSign, color: 'green', label: t('finance_label'), text: financeText },
+          { icon: Activity,   color: 'blue',  label: t('health_label'),  text: healthText },
         ].map(({ icon: Icon, color, label, text }) => (
           <div key={label} className="bg-white border border-stone-200 rounded-2xl p-5 card-shadow">
             <div className={`flex items-center gap-2 mb-3 text-${color}-600`}>
@@ -134,16 +193,16 @@ export default async function HoroscopePage({ params }: { params: Promise<{ loca
         <Lightbulb className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
         <div>
           <p className="font-semibold text-stone-900 text-sm mb-1">{t('daily_advice')}</p>
-          <p className="text-stone-600 text-sm leading-relaxed">{h.advice}</p>
+          <p className="text-stone-600 text-sm leading-relaxed">{adviceText}</p>
         </div>
       </div>
 
       {/* Description */}
       <div className="bg-white border border-stone-200 rounded-2xl p-6 mb-8 card-shadow">
         <h2 className="font-serif text-xl font-semibold text-stone-900 mb-3">{t('about_sign')} {signName}</h2>
-        <p className="text-stone-600 leading-relaxed mb-4">{sign.description}</p>
+        <p className="text-stone-600 leading-relaxed mb-4">{description}</p>
         <div className="flex flex-wrap gap-2">
-          {sign.traits.map((trait) => (
+          {traits.map((trait) => (
             <span key={trait} className="px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-700 text-sm">
               {trait}
             </span>
@@ -193,11 +252,25 @@ async function AllSignsPage({ locale, period }: { locale: string; period: string
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {zodiacSigns.map((sign) => {
-          const h = source === 'week'
+          const hRu = source === 'week'
             ? weeklyHoroscopes[sign.slug]
             : source === 'month'
               ? monthlyHoroscopes[sign.slug]
               : getHoroscopeForToday(sign.slug);
+          const uzW = weeklyHoroscopesUz[sign.slug];
+          const uzM = monthlyHoroscopesUz[sign.slug];
+          const uzD = dailyPoolUz[sign.slug];
+          const uzMeta = zodiacSignsUz[sign.slug];
+          let text: string;
+          if (locale === 'uz') {
+            if (source === 'week') text = uzW?.general ?? hRu.general;
+            else if (source === 'month') text = uzM?.general ?? hRu.general;
+            else if (key === 'love') text = uzW?.love ?? hRu.love;
+            else text = uzD ? uzD[getDayIndex()] : hRu.general;
+          } else {
+            text = hRu[key];
+          }
+          const signDates = locale === 'uz' && uzMeta ? uzMeta.datesUz : sign.dates;
           return (
             <Link
               key={sign.slug}
@@ -208,10 +281,10 @@ async function AllSignsPage({ locale, period }: { locale: string; period: string
                 <span className="text-3xl group-hover:scale-110 transition-transform">{sign.emoji}</span>
                 <div>
                   <div className="font-semibold text-stone-900">{locale === 'uz' ? sign.uz : sign.ru}</div>
-                  <div className="text-xs text-stone-400">{sign.dates}</div>
+                  <div className="text-xs text-stone-400">{signDates}</div>
                 </div>
               </div>
-              <p className="text-sm text-stone-600 line-clamp-3 leading-relaxed">{h[key]}</p>
+              <p className="text-sm text-stone-600 line-clamp-3 leading-relaxed">{text}</p>
             </Link>
           );
         })}

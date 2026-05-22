@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function AboutPage() {
+export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
@@ -79,13 +80,13 @@ export default function AboutPage() {
               <span>Ташкент, Узбекистан</span>
             </div>
             <a
-              href="https://t.me/ruyo_uz"
+              href={locale === 'uz' ? 'https://t.me/ruyo_uz' : 'https://t.me/ruyouz_ru'}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-lg text-blue-600 text-sm font-medium hover:bg-blue-100 transition-colors mt-2"
             >
               <Send className="w-4 h-4" />
-              Telegram: @ruyo_uz
+              {locale === 'uz' ? 'Telegram: @ruyo_uz' : 'Telegram: @ruyouz_ru'}
             </a>
           </div>
         </section>

@@ -6,6 +6,7 @@ export default function Footer() {
   const t = useTranslations('footer');
   const locale = useLocale();
   const year = new Date().getFullYear();
+  const tgUrl = locale === 'uz' ? 'https://t.me/ruyo_uz' : 'https://t.me/ruyouz_ru';
 
   return (
     <footer className="bg-white border-t border-stone-200 mt-20">
@@ -24,7 +25,7 @@ export default function Footer() {
               {t('tagline')}
             </p>
             <a
-              href="https://t.me/ruyo_uz"
+              href={tgUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-lg text-blue-600 text-sm font-medium hover:bg-blue-100 transition-colors"

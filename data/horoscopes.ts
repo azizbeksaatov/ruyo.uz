@@ -37,7 +37,7 @@ export const zodiacSigns: ZodiacSign[] = [
   {
     slug: 'telets',
     ru: 'Телец',
-    uz: 'Buqa',
+    uz: 'Buzoq',
     emoji: '♉',
     dates: '20 апреля — 20 мая',
     element: 'Земля',
@@ -59,7 +59,7 @@ export const zodiacSigns: ZodiacSign[] = [
   {
     slug: 'rak',
     ru: 'Рак',
-    uz: 'Qisqichbaqa',
+    uz: 'Saraton',
     emoji: '♋',
     dates: '21 июня — 22 июля',
     element: 'Вода',
@@ -81,7 +81,7 @@ export const zodiacSigns: ZodiacSign[] = [
   {
     slug: 'deva',
     ru: 'Дева',
-    uz: 'Bokira',
+    uz: 'Parizod',
     emoji: '♍',
     dates: '23 августа — 22 сентября',
     element: 'Земля',
@@ -114,7 +114,7 @@ export const zodiacSigns: ZodiacSign[] = [
   {
     slug: 'strelets',
     ru: 'Стрелец',
-    uz: 'Yoy',
+    uz: "O'qotar",
     emoji: '♐',
     dates: '22 ноября — 21 декабря',
     element: 'Огонь',
@@ -125,7 +125,7 @@ export const zodiacSigns: ZodiacSign[] = [
   {
     slug: 'kozerog',
     ru: 'Козерог',
-    uz: "Tog'arka",
+    uz: "Tog' echkisi",
     emoji: '♑',
     dates: '22 декабря — 19 января',
     element: 'Земля',
@@ -136,7 +136,7 @@ export const zodiacSigns: ZodiacSign[] = [
   {
     slug: 'vodoley',
     ru: 'Водолей',
-    uz: 'Suv quyuvchi',
+    uz: "Qovg'a",
     emoji: '♒',
     dates: '20 января — 18 февраля',
     element: 'Воздух',
@@ -147,7 +147,7 @@ export const zodiacSigns: ZodiacSign[] = [
   {
     slug: 'ryby',
     ru: 'Рыбы',
-    uz: 'Baliqlar',
+    uz: 'Baliq',
     emoji: '♓',
     dates: '19 февраля — 20 марта',
     element: 'Вода',

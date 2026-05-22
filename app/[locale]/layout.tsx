@@ -27,13 +27,20 @@ export async function generateMetadata({
     title: { default: `${t('name')} — ${t('tagline')}`, template: `%s | ${t('name')}` },
     description: t('description'),
     metadataBase: new URL('https://ruyo.uz'),
-    alternates: { canonical: '/', languages: { ru: '/ru', uz: '/uz' } },
+    alternates: {
+      canonical: locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz',
+      languages: {
+        'ru': 'https://ruyo.uz',
+        'uz': 'https://ruyo.uz/uz',
+        'x-default': 'https://ruyo.uz',
+      },
+    },
     openGraph: {
       type: 'website',
       locale: locale === 'uz' ? 'uz_UZ' : 'ru_RU',
-      url: 'https://ruyo.uz',
+      url: locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz',
       siteName: 'Ruyo.uz',
-      images: [{ url: '/logo.png', width: 534, height: 144, alt: 'Ruyo.uz' }],
+      images: [{ url: 'https://ruyo.uz/api/og?title=Ruyo.uz+%E2%80%94+%D0%A1%D0%BE%D0%BD%D0%BD%D0%B8%D0%BA+%D0%B8+%D0%B3%D0%BE%D1%80%D0%BE%D1%81%D0%BA%D0%BE%D0%BF&emoji=%F0%9F%8C%99&type=dream&locale=' + locale, width: 1200, height: 630, alt: 'Ruyo.uz' }],
     },
     robots: { index: true, follow: true },
   };

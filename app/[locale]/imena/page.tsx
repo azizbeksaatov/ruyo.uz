@@ -1,8 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { ORIGIN_LABELS } from '@/data/names';
 import type { NameOrigin } from '@/data/names';
 import { fetchNames } from '@/lib/names-db';
+import { LATIN_LETTERS_UZ } from '@/lib/transliterate';
 import { Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import NameNotFound from '@/components/NameNotFound';
@@ -25,6 +27,7 @@ const LIMIT = 120;
 
 const CYRILLIC_LETTERS = ['А','Б','В','Г','Д','Е','Ж','З','И','К','Л','М','Н','О','П','Р','С','Т','У','Ф','Х','Ц','Ч','Ш','Э','Ю','Я'];
 
+
 export default async function NamesPage({
   params,
   searchParams,
@@ -34,10 +37,19 @@ export default async function NamesPage({
 }) {
   const { locale } = await params;
   const { origin, q, letter, page: pageStr } = await searchParams;
+
+  // Auto-switch locale based on script: Latin on RU page → UZ; Cyrillic on UZ page → RU
+  if (q?.trim()) {
+    const hasCyr = /[Ѐ-ӿ]/.test(q);
+    const hasLat = /[a-zA-Z]/.test(q);
+    if (locale === 'ru' && hasLat && !hasCyr) redirect(`/uz/imena?q=${encodeURIComponent(q)}`);
+    if (locale === 'uz' && hasCyr)           redirect(`/imena?q=${encodeURIComponent(q)}`);
+  }
+
   const t = await getTranslations({ locale, namespace: 'names' });
   const page = Math.max(1, parseInt(pageStr ?? '1') || 1);
 
-  const { names: filteredNames, total } = await fetchNames({ origin, q, letter, page, limit: LIMIT });
+  const { names: filteredNames, total } = await fetchNames({ origin, q, letter, page, limit: LIMIT, locale });
   const totalPages = Math.ceil(total / LIMIT);
 
   const notFound = !!q && filteredNames.length === 0;
@@ -112,23 +124,29 @@ export default async function NamesPage({
       </div>
 
       {/* Alphabet bar */}
-      <div className="flex flex-wrap gap-1 mb-8">
-        <Link
-          href={`/${locale}/imena${origin ? `?origin=${origin}` : ''}`}
-          className={`px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${!letter && !q ? 'bg-teal-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-teal-300 hover:text-teal-700'}`}
-        >
-          Все
-        </Link>
-        {CYRILLIC_LETTERS.map((l) => (
-          <Link
-            key={l}
-            href={letterHref(l)}
-            className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${letter === l ? 'bg-teal-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-teal-300 hover:text-teal-700'}`}
-          >
-            {l}
-          </Link>
-        ))}
-      </div>
+      {(() => {
+        const letters = locale === 'uz' ? LATIN_LETTERS_UZ : CYRILLIC_LETTERS;
+        const allLabel = locale === 'uz' ? 'Barchasi' : 'Все';
+        return (
+          <div className="flex flex-wrap gap-1 mb-8">
+            <Link
+              href={`/${locale}/imena${origin ? `?origin=${origin}` : ''}`}
+              className={`px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${!letter && !q ? 'bg-teal-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-teal-300 hover:text-teal-700'}`}
+            >
+              {allLabel}
+            </Link>
+            {letters.map((l) => (
+              <Link
+                key={l}
+                href={letterHref(l)}
+                className={`min-w-[2.25rem] h-9 px-1 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${letter === l ? 'bg-teal-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-teal-300 hover:text-teal-700'}`}
+              >
+                {l}
+              </Link>
+            ))}
+          </div>
+        );
+      })()}
 
       {q && !notFound && (
         <p className="text-stone-500 text-sm mb-6">

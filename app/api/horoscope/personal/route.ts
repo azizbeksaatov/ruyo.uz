@@ -3,18 +3,18 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 function getZodiacSign(day: number, month: number): { sign: string; ru: string; uz: string; emoji: string; dates: string } {
   const signs = [
-    { sign: 'kozerog',   ru: 'Козерог',    uz: "Tog'arka",      emoji: '♑', dates: '22 дек — 19 янв', from: [12,22], to: [1,19]  },
-    { sign: 'vodoley',   ru: 'Водолей',    uz: 'Suv quyuvchi',  emoji: '♒', dates: '20 янв — 18 фев', from: [1,20],  to: [2,18]  },
-    { sign: 'ryby',      ru: 'Рыбы',       uz: 'Baliqlar',      emoji: '♓', dates: '19 фев — 20 мар', from: [2,19],  to: [3,20]  },
+    { sign: 'kozerog',   ru: 'Козерог',    uz: "Tog' echkisi",  emoji: '♑', dates: '22 дек — 19 янв', from: [12,22], to: [1,19]  },
+    { sign: 'vodoley',   ru: 'Водолей',    uz: "Qovg'a",        emoji: '♒', dates: '20 янв — 18 фев', from: [1,20],  to: [2,18]  },
+    { sign: 'ryby',      ru: 'Рыбы',       uz: 'Baliq',         emoji: '♓', dates: '19 фев — 20 мар', from: [2,19],  to: [3,20]  },
     { sign: 'oven',      ru: 'Овен',       emoji: '♈', uz: "Qo'y",        dates: '21 мар — 19 апр', from: [3,21],  to: [4,19]  },
-    { sign: 'telets',    ru: 'Телец',      uz: 'Buqa',          emoji: '♉', dates: '20 апр — 20 май', from: [4,20],  to: [5,20]  },
+    { sign: 'telets',    ru: 'Телец',      uz: 'Buzoq',         emoji: '♉', dates: '20 апр — 20 май', from: [4,20],  to: [5,20]  },
     { sign: 'bliznetsy', ru: 'Близнецы',   uz: 'Egizaklar',     emoji: '♊', dates: '21 май — 20 июн', from: [5,21],  to: [6,20]  },
-    { sign: 'rak',       ru: 'Рак',        uz: 'Qisqichbaqa',   emoji: '♋', dates: '21 июн — 22 июл', from: [6,21],  to: [7,22]  },
+    { sign: 'rak',       ru: 'Рак',        uz: 'Saraton',       emoji: '♋', dates: '21 июн — 22 июл', from: [6,21],  to: [7,22]  },
     { sign: 'lev',       ru: 'Лев',        uz: 'Arslon',        emoji: '♌', dates: '23 июл — 22 авг', from: [7,23],  to: [8,22]  },
-    { sign: 'deva',      ru: 'Дева',       uz: 'Bokira',        emoji: '♍', dates: '23 авг — 22 сен', from: [8,23],  to: [9,22]  },
+    { sign: 'deva',      ru: 'Дева',       uz: 'Parizod',       emoji: '♍', dates: '23 авг — 22 сен', from: [8,23],  to: [9,22]  },
     { sign: 'vesy',      ru: 'Весы',       uz: 'Tarozi',        emoji: '♎', dates: '23 сен — 22 окт', from: [9,23],  to: [10,22] },
     { sign: 'skorpion',  ru: 'Скорпион',   uz: 'Chayon',        emoji: '♏', dates: '23 окт — 21 ноя', from: [10,23], to: [11,21] },
-    { sign: 'strelets',  ru: 'Стрелец',    uz: 'Yoy',           emoji: '♐', dates: '22 ноя — 21 дек', from: [11,22], to: [12,21] },
+    { sign: 'strelets',  ru: 'Стрелец',    uz: "O'qotar",       emoji: '♐', dates: '22 ноя — 21 дек', from: [11,22], to: [12,21] },
   ];
 
   for (const s of signs) {
