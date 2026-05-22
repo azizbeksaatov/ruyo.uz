@@ -33,18 +33,25 @@ function generateRuleBasedInterpretation(dreamText: string, context: string): st
 }
 
 export async function POST(req: NextRequest) {
+  let dream: string, context: string;
   try {
-    const { dream, context } = await req.json();
+    const body = await req.json();
+    dream = body.dream;
+    context = body.context ?? '';
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
 
-    if (!dream || typeof dream !== 'string') {
-      return NextResponse.json({ error: 'Dream text required' }, { status: 400 });
-    }
+  if (!dream || typeof dream !== 'string') {
+    return NextResponse.json({ error: 'Dream text required' }, { status: 400 });
+  }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
 
-    if (apiKey) {
+  if (apiKey) {
+    try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const result = await model.generateContent(
         `Ты — опытный толкователь снов для аудитории из Узбекистана и СНГ.
@@ -56,16 +63,11 @@ export async function POST(req: NextRequest) {
 
       const interpretation = result.response.text();
       return NextResponse.json({ interpretation });
+    } catch (geminiError) {
+      console.error('Gemini API error:', geminiError instanceof Error ? geminiError.message : geminiError);
     }
-
-    const interpretation = generateRuleBasedInterpretation(dream, context);
-    return NextResponse.json({ interpretation });
-
-  } catch (error) {
-    console.error('Interpret error:', error);
-    return NextResponse.json(
-      { interpretation: 'Произошла ошибка при анализе. Попробуйте позже.' },
-      { status: 500 }
-    );
   }
+
+  const interpretation = generateRuleBasedInterpretation(dream, context);
+  return NextResponse.json({ interpretation });
 }
