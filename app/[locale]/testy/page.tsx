@@ -10,6 +10,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('title'),
     description: t('subtitle'),
+    alternates: {
+      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/testy' : 'https://ruyo.uz/testy',
+      languages: { ru: 'https://ruyo.uz/testy', uz: 'https://ruyo.uz/uz/testy' },
+    },
   };
 }
 

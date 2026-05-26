@@ -2,11 +2,20 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Send } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'О сайте — Ruyo.uz | Сонник и гороскоп',
-  description: 'Ruyo.uz — ведущий сайт о снах, гороскопах и значении имён для Узбекистана и СНГ. Узнайте о нашей миссии и команде.',
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: locale === 'uz' ? 'Sayt haqida — Ruyo.uz' : 'О сайте — Ruyo.uz | Сонник и гороскоп',
+    description: locale === 'uz'
+      ? "Ruyo.uz — O'zbekiston va MDH uchun tushlar, goroskoplar va ismlar ma'nosini bilish bo'yicha yetakchi sayt."
+      : 'Ruyo.uz — ведущий сайт о снах, гороскопах и значении имён для Узбекистана и СНГ.',
+    alternates: {
+      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/about' : 'https://ruyo.uz/about',
+      languages: { ru: 'https://ruyo.uz/about', uz: 'https://ruyo.uz/uz/about' },
+    },
+    robots: { index: true, follow: true },
+  };
+}
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

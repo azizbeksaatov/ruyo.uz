@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 220" width="480" height="220">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d0a2e"/>
+      <stop offset="60%" stop-color="#1a0a3e"/>
+      <stop offset="100%" stop-color="#2d0a4e"/>
+    </linearGradient>
+    <linearGradient id="moonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8d5a3"/>
+      <stop offset="100%" stop-color="#c9a84c"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c9a84c"/>
+      <stop offset="50%" stop-color="#e8d5a3"/>
+      <stop offset="100%" stop-color="#b07fc8"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="480" height="220" fill="url(#bg1)" rx="16"/>
+
+  <!-- Stars scattered -->
+  <g fill="#e8d5a3" opacity="0.5">
+    <circle cx="30" cy="20" r="1.2"/><circle cx="55" cy="45" r="0.8"/>
+    <circle cx="420" cy="15" r="1.5"/><circle cx="445" cy="40" r="0.9"/>
+    <circle cx="460" cy="70" r="1.1"/><circle cx="410" cy="80" r="0.7"/>
+    <circle cx="22" cy="80" r="1.0"/><circle cx="40" cy="110" r="0.7"/>
+    <circle cx="450" cy="160" r="1.2"/><circle cx="430" cy="190" r="0.8"/>
+    <circle cx="25" cy="150" r="1.3"/><circle cx="10" cy="170" r="0.7"/>
+    <circle cx="380" cy="200" r="1.0"/><circle cx="68" cy="30" r="0.6"/>
+  </g>
+
+  <!-- Moon crescent — two circles -->
+  <circle cx="110" cy="110" r="72" fill="url(#moonGrad)" filter="url(#softglow)" opacity="0.95"/>
+  <circle cx="135" cy="95" r="60" fill="#1a0a3e"/>
+
+  <!-- Sleeping face profile inside crescent -->
+  <g fill="none" stroke="#0d0a2e" stroke-width="1.5" stroke-linecap="round">
+    <!-- Forehead curve -->
+    <path d="M88 72 Q98 60 110 65 Q120 69 122 80"/>
+    <!-- Nose -->
+    <path d="M122 80 Q126 95 124 105 Q121 112 118 114"/>
+    <!-- Lips -->
+    <path d="M118 114 Q115 120 110 122 Q104 124 101 121"/>
+    <!-- Chin and neck -->
+    <path d="M101 121 Q95 128 93 138 Q91 148 92 158"/>
+    <!-- Closed eye -->
+    <path d="M106 78 Q112 74 118 76" stroke-width="1.8"/>
+    <!-- Eyelash hint -->
+    <line x1="109" y1="78" x2="107" y2="82"/>
+    <line x1="112" y1="76" x2="111" y2="80"/>
+  </g>
+
+  <!-- Icons inside crescent -->
+  <!-- Book icon -->
+  <g transform="translate(76, 90)" fill="#0d0a2e" opacity="0.85">
+    <rect x="0" y="0" width="10" height="13" rx="1"/>
+    <rect x="2" y="2" width="6" height="1" fill="#e8d5a3" opacity="0.7"/>
+    <rect x="2" y="4.5" width="6" height="1" fill="#e8d5a3" opacity="0.7"/>
+    <rect x="2" y="7" width="4" height="1" fill="#e8d5a3" opacity="0.7"/>
+  </g>
+  <!-- Star icon -->
+  <g transform="translate(90, 130)" fill="#c9a84c">
+    <polygon points="5,0 6.2,3.8 10,3.8 7,6.1 8.1,10 5,7.8 1.9,10 3,6.1 0,3.8 3.8,3.8" opacity="0.9"/>
+  </g>
+  <!-- Pen/feather icon -->
+  <g transform="translate(97, 95)" fill="none" stroke="#0d0a2e" stroke-width="1.2" opacity="0.85">
+    <path d="M0 14 Q3 10 6 6 Q9 2 12 0 Q10 4 8 8 Q6 11 3 14 Z" fill="#e8d5a3" opacity="0.7"/>
+    <line x1="0" y1="14" x2="3" y2="17"/>
+  </g>
+
+  <!-- RUYO text -->
+  <text x="215" y="105" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-weight="700"
+        fill="url(#textGrad)" filter="url(#glow)" letter-spacing="6" text-anchor="middle">RUYO</text>
+
+  <!-- Tagline -->
+  <text x="215" y="138" font-family="Georgia, serif" font-size="11.5" fill="#b07fc8"
+        letter-spacing="1.5" text-anchor="middle" opacity="0.9">Твой проводник в мир снов и судьбы</text>
+
+  <!-- Decorative line under tagline -->
+  <line x1="155" y1="148" x2="275" y2="148" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- Small stars near text -->
+  <text x="158" y="102" font-family="serif" font-size="10" fill="#c9a84c" opacity="0.7">✦</text>
+  <text x="268" y="102" font-family="serif" font-size="10" fill="#c9a84c" opacity="0.7">✦</text>
+
+  <!-- Subtitle small -->
+  <text x="215" y="168" font-family="Georgia, serif" font-size="10" fill="#6b4fa0"
+        letter-spacing="2" text-anchor="middle" opacity="0.7">СОННИК · ИМЕНА · ГОРОСКОПЫ</text>
+</svg>

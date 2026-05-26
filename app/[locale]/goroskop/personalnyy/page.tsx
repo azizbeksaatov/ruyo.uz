@@ -8,7 +8,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('personal_title'),
     description: t('personal_subtitle'),
-    alternates: { canonical: `https://ruyo.uz/${locale}/goroskop/personalnyy` },
+    alternates: {
+      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/goroskop/personalnyy' : 'https://ruyo.uz/goroskop/personalnyy',
+      languages: {
+        ru: 'https://ruyo.uz/goroskop/personalnyy',
+        uz: 'https://ruyo.uz/uz/goroskop/personalnyy',
+      },
+    },
   };
 }
 

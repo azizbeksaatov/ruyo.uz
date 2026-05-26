@@ -106,13 +106,14 @@ export default async function HoroscopePage({ params }: { params: Promise<{ loca
 
   const otherSigns = zodiacSigns.filter((s) => s.slug !== slug).slice(0, 8);
 
+  const siteBase = locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz';
   const breadcrumbData = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
-      { '@type': 'ListItem', position: 2, name: tNav('goroskop'), item: `https://ruyo.uz/${locale}/goroskop` },
-      { '@type': 'ListItem', position: 3, name: signName, item: `https://ruyo.uz/${locale}/goroskop/${slug}` },
+      { '@type': 'ListItem', position: 2, name: tNav('goroskop'), item: `${siteBase}/goroskop` },
+      { '@type': 'ListItem', position: 3, name: signName, item: `${siteBase}/goroskop/${slug}` },
     ],
   };
 

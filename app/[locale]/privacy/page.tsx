@@ -1,11 +1,20 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Политика конфиденциальности — Ruyo.uz',
-  description: 'Политика конфиденциальности сайта Ruyo.uz. Мы уважаем вашу приватность и защищаем ваши данные.',
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: locale === 'uz' ? "Maxfiylik siyosati — Ruyo.uz" : 'Политика конфиденциальности — Ruyo.uz',
+    description: locale === 'uz'
+      ? "Ruyo.uz maxfiylik siyosati. Biz sizning shaxsiy ma'lumotlaringizni himoya qilamiz."
+      : 'Политика конфиденциальности сайта Ruyo.uz. Мы уважаем вашу приватность и защищаем ваши данные.',
+    alternates: {
+      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/privacy' : 'https://ruyo.uz/privacy',
+      languages: { ru: 'https://ruyo.uz/privacy', uz: 'https://ruyo.uz/uz/privacy' },
+    },
+    robots: { index: true, follow: true },
+  };
+}
 
 export default function PrivacyPage() {
   return (

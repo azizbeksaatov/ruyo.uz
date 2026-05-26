@@ -10,10 +10,20 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const test = getTestBySlug(slug);
   if (!test) return {};
-  return { title: test.title, description: test.description };
+  return {
+    title: test.title,
+    description: test.description,
+    alternates: {
+      canonical: locale === 'uz' ? `https://ruyo.uz/uz/testy/${slug}` : `https://ruyo.uz/testy/${slug}`,
+      languages: {
+        ru: `https://ruyo.uz/testy/${slug}`,
+        uz: `https://ruyo.uz/uz/testy/${slug}`,
+      },
+    },
+  };
 }
 
 export default async function TestPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {

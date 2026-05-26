@@ -86,6 +86,7 @@ export default async function DreamVariantPage({
     tags:    uz?.tags    ?? dream.tags,
   };
 
+  const base     = locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz';
   const meta     = VARIANT_META[variant as DreamVariant];
   const h1       = locale === 'uz' ? meta.uzH1(content.title) : meta.ruH1(content.title);
   const leadText = locale === 'uz'
@@ -152,9 +153,9 @@ export default async function DreamVariantPage({
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
-      { '@type': 'ListItem', position: 2, name: tNav('sonnik'), item: `https://ruyo.uz/${locale}/sonnik` },
-      { '@type': 'ListItem', position: 3, name: content.title, item: `https://ruyo.uz/${locale}/sonnik/${slug}` },
-      { '@type': 'ListItem', position: 4, name: h1,            item: `https://ruyo.uz/${locale}/sonnik/${slug}/${variant}` },
+      { '@type': 'ListItem', position: 2, name: tNav('sonnik'), item: `${base}/sonnik` },
+      { '@type': 'ListItem', position: 3, name: content.title, item: `${base}/sonnik/${slug}` },
+      { '@type': 'ListItem', position: 4, name: h1,            item: `${base}/sonnik/${slug}/${variant}` },
     ],
   };
 
