@@ -10,8 +10,8 @@ import { translate } from '@vitalets/google-translate-api';
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 
-const SUPABASE_URL = 'https://tguyzvmmbnsczwulydgi.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRndXl6dm1tYm5zY3p3dWx5ZGdpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODA3MjMyMCwiZXhwIjoyMDkzNjQ4MzIwfQ.ngHjcq2dh8-7gSRnMkbeAbmldDQK07blUKUeDGEZPkg';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
 
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 const CACHE_FILE   = 'scripts/.names-uz-cache.json';
