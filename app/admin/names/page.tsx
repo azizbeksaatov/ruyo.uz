@@ -1,5 +1,10 @@
+import type { Metadata } from 'next';
 import { createServerSupabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 // Simple auth — protect with env variable
 const ADMIN_KEY = process.env.ADMIN_SECRET_KEY;

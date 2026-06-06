@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Static pages
     entries.push(
-      { url: `${BASE_URL}${prefix}/`,        lastModified: NOW, changeFrequency: 'daily',  priority: 1.0 },
+      { url: prefix ? `${BASE_URL}${prefix}` : BASE_URL, lastModified: NOW, changeFrequency: 'daily',  priority: 1.0 },
       { url: `${BASE_URL}${prefix}/sonnik`,  lastModified: NOW, changeFrequency: 'daily',  priority: 0.9 },
       { url: `${BASE_URL}${prefix}/goroskop`,lastModified: NOW, changeFrequency: 'daily',  priority: 0.9 },
       { url: `${BASE_URL}${prefix}/imena`,   lastModified: NOW, changeFrequency: 'weekly', priority: 0.8 },
@@ -40,15 +40,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.75,
       });
 
-      // Dream variant sub-pages (dlya-zhenshchin, dlya-muzhchin, islamskiy)
-      for (const variant of VARIANTS) {
-        entries.push({
-          url: `${BASE_URL}${prefix}/sonnik/${dream.slug}/${variant}`,
-          lastModified: new Date(getSlugDate(dream.slug)),
-          changeFrequency: 'monthly',
-          priority: 0.6,
-        });
-      }
+      // Variant sub-pages omitted from sitemap intentionally — Google finds them
+      // via internal links; keeping 3018 thin-variant URLs out of sitemap frees
+      // crawl budget for the 500+ main dream pages and other priority content.
     }
 
     // Horoscope pages — daily (content changes every day)
