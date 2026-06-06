@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import Script from 'next/script';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import '../globals.css';
@@ -44,6 +45,7 @@ export async function generateMetadata({
     },
     robots: { index: true, follow: true },
     verification: { google: 'ZzuUJFm-AAc7zr0PwjFu5_Qd40Nykq7JgXTPvb8Jjc8' },
+    other: { 'google-adsense-account': 'ca-pub-7667826503997562' },
   };
 }
 
@@ -70,6 +72,12 @@ export default async function LocaleLayout({
           <main>{children}</main>
           <Footer />
         </NextIntlClientProvider>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7667826503997562"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
