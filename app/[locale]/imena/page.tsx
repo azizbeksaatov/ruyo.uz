@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+﻿import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ORIGIN_LABELS } from '@/data/names';
@@ -10,6 +10,8 @@ import type { Metadata } from 'next';
 import NameNotFound from '@/components/NameNotFound';
 import NameSubmitForm from '@/components/NameSubmitForm';
 
+export const revalidate = 3600;
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'names' });
@@ -17,8 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('title'),
     description: t('subtitle'),
     alternates: {
-      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/imena' : 'https://ruyo.uz/imena',
-      languages: { ru: 'https://ruyo.uz/imena', uz: 'https://ruyo.uz/uz/imena' },
+      canonical: locale === 'uz' ? 'https://www.ruyo.uz/uz/imena' : 'https://www.ruyo.uz/imena',
+      languages: { ru: 'https://www.ruyo.uz/imena', uz: 'https://www.ruyo.uz/uz/imena' },
     },
   };
 }
@@ -43,6 +45,7 @@ export default async function NamesPage({
   searchParams: Promise<{ origin?: string; q?: string; letter?: string; page?: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const { origin, q, letter, page: pageStr } = await searchParams;
 
   // Auto-switch locale based on script: Latin on RU page → UZ; Cyrillic on UZ page → RU

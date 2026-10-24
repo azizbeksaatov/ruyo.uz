@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getTestBySlug, viralTests } from '@/data/tests';
-import { getTranslations } from 'next-intl/server';
+import { testTranslationsUz } from '@/data/testTranslationsUz';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import ViralTestClient from '@/components/ViralTestClient';
 import type { Metadata } from 'next';
 
@@ -13,14 +14,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale, slug } = await params;
   const test = getTestBySlug(slug);
   if (!test) return {};
+  const uz = locale === 'uz' ? testTranslationsUz[slug] : null;
   return {
-    title: test.title,
-    description: test.description,
+    title: uz?.title ?? test.title,
+    description: uz?.description ?? test.description,
     alternates: {
-      canonical: locale === 'uz' ? `https://ruyo.uz/uz/testy/${slug}` : `https://ruyo.uz/testy/${slug}`,
+      canonical: locale === 'uz' ? `https://www.ruyo.uz/uz/testy/${slug}` : `https://www.ruyo.uz/testy/${slug}`,
       languages: {
-        ru: `https://ruyo.uz/testy/${slug}`,
-        uz: `https://ruyo.uz/uz/testy/${slug}`,
+        ru: `https://www.ruyo.uz/testy/${slug}`,
+        uz: `https://www.ruyo.uz/uz/testy/${slug}`,
       },
     },
   };
@@ -28,12 +30,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function TestPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const test = getTestBySlug(slug);
   if (!test) notFound();
 
+  const pageTitle = (locale === 'uz' ? testTranslationsUz[slug]?.title : null) ?? test.title;
   const tNav = await getTranslations({ locale, namespace: 'nav' });
   const tTests = await getTranslations({ locale, namespace: 'tests' });
-  const pageUrl = locale === 'uz' ? `https://ruyo.uz/uz/testy/${slug}` : `https://ruyo.uz/testy/${slug}`;
+  const pageUrl = locale === 'uz' ? `https://www.ruyo.uz/uz/testy/${slug}` : `https://www.ruyo.uz/testy/${slug}`;
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -42,7 +46,7 @@ export default async function TestPage({ params }: { params: Promise<{ locale: s
         <span>/</span>
         <Link href={`/${locale}/testy`} className="hover:text-stone-700 transition-colors">{tNav('tests')}</Link>
         <span>/</span>
-        <span className="text-stone-700 line-clamp-1">{test.title}</span>
+        <span className="text-stone-700 line-clamp-1">{pageTitle}</span>
       </nav>
       <ViralTestClient test={test} locale={locale} backLabel={tTests('back')} pageUrl={pageUrl} />
     </div>

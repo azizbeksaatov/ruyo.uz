@@ -19,6 +19,7 @@ export interface ZodiacSign {
   element: string;
   planet: string;
   traits: string[];
+  traitsUz: string[];
   description: string;
 }
 
@@ -32,6 +33,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Огонь',
     planet: 'Марс',
     traits: ['энергичный', 'смелый', 'лидер', 'импульсивный'],
+    traitsUz: ['faol', 'jasur', 'rahbar', 'impulsiv'],
     description: 'Овен — первый знак зодиака, символ нового начала и первопроходчества. Люди этого знака обладают природной смелостью, лидерскими качествами и неиссякаемой энергией.',
   },
   {
@@ -43,6 +45,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Земля',
     planet: 'Венера',
     traits: ['надёжный', 'терпеливый', 'практичный', 'упрямый'],
+    traitsUz: ['ishonchli', 'sabotli', 'amaliy', 'qaysar'],
     description: 'Телец — знак стабильности, красоты и материального мира. Рождённые под этим знаком ценят комфорт, верность и настоящую красоту.',
   },
   {
@@ -54,6 +57,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Воздух',
     planet: 'Меркурий',
     traits: ['общительный', 'любознательный', 'адаптивный', 'непостоянный'],
+    traitsUz: ['muloqotchan', 'qiziquvchan', 'moslashuvchan', "o'zgaruvchan"],
     description: 'Близнецы — самый коммуникабельный знак зодиака. Их двойственная природа делает их универсальными и интересными собеседниками.',
   },
   {
@@ -65,6 +69,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Вода',
     planet: 'Луна',
     traits: ['интуитивный', 'заботливый', 'эмоциональный', 'защитник'],
+    traitsUz: ['intuitiv', "g'amxo'r", 'hissiy', 'himoyachi'],
     description: 'Рак — знак дома, семьи и глубоких эмоций. Эти люди обладают сильной интуицией и безграничной заботой о близких.',
   },
   {
@@ -76,6 +81,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Огонь',
     planet: 'Солнце',
     traits: ['харизматичный', 'щедрый', 'гордый', 'творческий'],
+    traitsUz: ['xarizmatik', 'saxiy', "mag'rur", 'ijodkor'],
     description: 'Лев — знак королей. Харизма, щедрость и природное лидерство делают этих людей центром любого общества.',
   },
   {
@@ -87,6 +93,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Земля',
     planet: 'Меркурий',
     traits: ['аналитичный', 'трудолюбивый', 'практичный', 'перфекционист'],
+    traitsUz: ['tahlilchi', 'mehnatsevar', 'amaliy', 'mukammallikchi'],
     description: 'Дева — знак аналитики и совершенства. Люди этого знака — мастера деталей, с высоким стандартом качества во всём.',
   },
   {
@@ -98,6 +105,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Воздух',
     planet: 'Венера',
     traits: ['дипломатичный', 'справедливый', 'общительный', 'нерешительный'],
+    traitsUz: ['diplomat', 'adolatli', 'muloqotchan', 'ikkilanuvchi'],
     description: 'Весы — знак гармонии и справедливости. Эти люди ищут баланс во всём и обладают природным дипломатическим талантом.',
   },
   {
@@ -109,6 +117,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Вода',
     planet: 'Плутон',
     traits: ['интенсивный', 'проницательный', 'страстный', 'таинственный'],
+    traitsUz: ['kuchli', 'ziyrak', 'ehtirosli', 'sirli'],
     description: 'Скорпион — самый загадочный знак зодиака. Глубина чувств, проницательность и трансформирующая сила — их главные качества.',
   },
   {
@@ -120,6 +129,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Огонь',
     planet: 'Юпитер',
     traits: ['оптимистичный', 'авантюрный', 'философский', 'прямолинейный'],
+    traitsUz: ['optimist', 'sarguzashtsevar', 'faylasuf', "to'g'riso'z"],
     description: 'Стрелец — знак приключений и мудрости. Вечные искатели истины, они стремятся к горизонту и любят свободу.',
   },
   {
@@ -131,6 +141,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Земля',
     planet: 'Сатурн',
     traits: ['дисциплинированный', 'амбициозный', 'ответственный', 'терпеливый'],
+    traitsUz: ['intizomli', 'ambitsiyali', "mas'uliyatli", 'sabotli'],
     description: 'Козерог — знак достижений и дисциплины. Эти люди строят жизнь как крепость: основательно, терпеливо и надолго.',
   },
   {
@@ -142,6 +153,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Воздух',
     planet: 'Уран',
     traits: ['новаторский', 'гуманный', 'независимый', 'эксцентричный'],
+    traitsUz: ['innovator', 'insonparvar', 'mustaqil', "g'ayriodatiy"],
     description: 'Водолей — знак будущего и человечества. Прогрессивные мыслители, они видят мир таким, каким он должен быть.',
   },
   {
@@ -153,6 +165,7 @@ export const zodiacSigns: ZodiacSign[] = [
     element: 'Вода',
     planet: 'Нептун',
     traits: ['интуитивный', 'творческий', 'сострадательный', 'мечтательный'],
+    traitsUz: ['intuitiv', 'ijodkor', 'rahmdil', 'orzumand'],
     description: 'Рыбы — знак духовности и творчества. Самые эмпатичные и мечтательные, они живут на границе реального и воображаемого.',
   },
 ];
@@ -269,29 +282,73 @@ export function getSignBySlug(slug: string): ZodiacSign | undefined {
   return zodiacSigns.find((s) => s.slug === slug);
 }
 
-export function getCompatibility(sign1: string, sign2: string): { percent: number; description: string } {
+export function getCompatibility(
+  sign1: string,
+  sign2: string,
+  locale = 'ru',
+): { percent: number; title: string; description: string; level: 'high' | 'medium' } {
   const compatible: Record<string, string[]> = {
-    oven: ['lev', 'strelets', 'bliznetsy', 'vodoley'],
-    telets: ['deva', 'kozerog', 'rak', 'ryby'],
-    bliznetsy: ['vesy', 'vodoley', 'oven', 'lev'],
-    rak: ['skorpion', 'ryby', 'telets', 'deva'],
-    lev: ['oven', 'strelets', 'bliznetsy', 'vesy'],
-    deva: ['telets', 'kozerog', 'rak', 'skorpion'],
-    vesy: ['bliznetsy', 'vodoley', 'lev', 'strelets'],
+    oven:     ['lev', 'strelets', 'bliznetsy', 'vodoley'],
+    telets:   ['deva', 'kozerog', 'rak', 'ryby'],
+    bliznetsy:['vesy', 'vodoley', 'oven', 'lev'],
+    rak:      ['skorpion', 'ryby', 'telets', 'deva'],
+    lev:      ['oven', 'strelets', 'bliznetsy', 'vesy'],
+    deva:     ['telets', 'kozerog', 'rak', 'skorpion'],
+    vesy:     ['bliznetsy', 'vodoley', 'lev', 'strelets'],
     skorpion: ['rak', 'ryby', 'deva', 'kozerog'],
     strelets: ['oven', 'lev', 'vesy', 'vodoley'],
-    kozerog: ['telets', 'deva', 'skorpion', 'ryby'],
-    vodoley: ['bliznetsy', 'vesy', 'oven', 'strelets'],
-    ryby: ['rak', 'skorpion', 'telets', 'kozerog'],
+    kozerog:  ['telets', 'deva', 'skorpion', 'ryby'],
+    vodoley:  ['bliznetsy', 'vesy', 'oven', 'strelets'],
+    ryby:     ['rak', 'skorpion', 'telets', 'kozerog'],
   };
 
-  const isCompatible = compatible[sign1]?.includes(sign2) || compatible[sign2]?.includes(sign1);
-  const percent = isCompatible ? Math.floor(Math.random() * 20) + 75 : Math.floor(Math.random() * 30) + 40;
+  const isCompatible = !!(compatible[sign1]?.includes(sign2) || compatible[sign2]?.includes(sign1));
+
+  // Deterministic: sort slugs so A+B == B+A, then hash
+  const [a, b] = [sign1, sign2].sort();
+  const hash = (a + b).split('').reduce((acc, c, i) => acc + c.charCodeAt(0) * (i + 1), 0);
+
+  const percent = isCompatible ? 75 + (hash % 21) : 42 + (hash % 28);
+  const level: 'high' | 'medium' = isCompatible ? 'high' : 'medium';
+
+  const highDescs = [
+    {
+      ru: 'Ваши знаки идеально дополняют друг друга. Природная гармония стихий создаёт мощную и вдохновляющую связь — вместе вы способны на великие дела.',
+      uz: "Belgilaringiz bir-birini mukammal to'ldiradi. Stixiyalarning tabiiy uyg'unligi kuchli va ilhomli aloqa yaratadi — birgalikda buyuk ishlarga qodirsiz.",
+    },
+    {
+      ru: 'Между вами — природное взаимопонимание и глубокое притяжение. Ваши стихии поддерживают друг друга, и даже трудности лишь укрепляют союз.',
+      uz: "Siz o'rtangizda tabiiy o'zaro tushunish va chuqur tortilish bor. Stixiyalaringiz bir-birini qo'llab-quvvatlaydi, qiyinchiliklar esa faqat birlashishingizni mustahkamlaydi.",
+    },
+    {
+      ru: 'Высокая совместимость создаёт прочную основу для долгих отношений. Схожие ценности и умение находить компромисс делают ваш союз по-настоящему устойчивым.',
+      uz: "Yuqori muvofiqlik uzoq munosabatlar uchun mustahkam asos yaratadi. Umumiy qadriyatlar va kelishuv topish qobiliyati ittifoqingizni haqiqatan barqaror qiladi.",
+    },
+  ];
+
+  const medDescs = [
+    {
+      ru: 'Ваши знаки имеют разные природы, но именно это делает отношения интересными. При взаимном уважении и желании слышать друг друга вы построите крепкий союз.',
+      uz: "Belgilaringiz turli tabiatlarga ega, ammo bu munosabatlarni qiziqarli qiladi. O'zaro hurmat va bir-biringizni eshitish istagi bilan mustahkam ittifoq qurasiz.",
+    },
+    {
+      ru: 'Определённые различия потребуют работы и компромиссов — зато они же дают возможность расти и учиться друг у друга. Терпение и открытость станут вашей силой.',
+      uz: "Ma'lum farqlar harakat va kelishuvlarni talab qiladi — lekin ular bir-biridan o'rganish imkonini beradi. Sabr va ochiqlik sizning kuchingizga aylanadi.",
+    },
+    {
+      ru: 'Ваши стихии создают определённое напряжение, которое может стать источником страсти и роста. Ищите точки соприкосновения и цените уникальность партнёра.',
+      uz: "Stixiyalaringiz ma'lum bir taranglik yaratadi va bu ehtiros va o'sish manbayiga aylanishi mumkin. Umumiy nuqtalar toping va sherigingizning o'ziga xosligini qadrlang.",
+    },
+  ];
+
+  const desc = isCompatible ? highDescs[hash % highDescs.length] : medDescs[hash % medDescs.length];
 
   return {
     percent,
-    description: isCompatible
-      ? 'Высокая совместимость! Ваши знаки дополняют друг друга и создают гармоничный союз.'
-      : 'Средняя совместимость. Различия могут стать источником роста, если оба готовы к компромиссу.',
+    level,
+    title: locale === 'uz'
+      ? (isCompatible ? 'Yuqori muvofiqlik' : "O'rtacha muvofiqlik")
+      : (isCompatible ? 'Высокая совместимость' : 'Средняя совместимость'),
+    description: locale === 'uz' ? desc.uz : desc.ru,
   };
 }

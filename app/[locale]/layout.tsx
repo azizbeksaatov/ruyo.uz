@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getTranslations } from 'next-intl/server';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import Script from 'next/script';
@@ -27,21 +27,21 @@ export async function generateMetadata({
   return {
     title: { default: `${t('name')} — ${t('tagline')}`, template: `%s | ${t('name')}` },
     description: t('description'),
-    metadataBase: new URL('https://ruyo.uz'),
+    metadataBase: new URL('https://www.ruyo.uz'),
     alternates: {
-      canonical: locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz',
+      canonical: locale === 'uz' ? 'https://www.ruyo.uz/uz' : 'https://www.ruyo.uz',
       languages: {
-        'ru': 'https://ruyo.uz',
-        'uz': 'https://ruyo.uz/uz',
-        'x-default': 'https://ruyo.uz',
+        'ru': 'https://www.ruyo.uz',
+        'uz': 'https://www.ruyo.uz/uz',
+        'x-default': 'https://www.ruyo.uz',
       },
     },
     openGraph: {
       type: 'website',
       locale: locale === 'uz' ? 'uz_UZ' : 'ru_RU',
-      url: locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz',
+      url: locale === 'uz' ? 'https://www.ruyo.uz/uz' : 'https://www.ruyo.uz',
       siteName: 'Ruyo.uz',
-      images: [{ url: 'https://ruyo.uz/api/og?title=Ruyo.uz+%E2%80%94+%D0%A1%D0%BE%D0%BD%D0%BD%D0%B8%D0%BA+%D0%B8+%D0%B3%D0%BE%D1%80%D0%BE%D1%81%D0%BA%D0%BE%D0%BF&emoji=%F0%9F%8C%99&type=dream&locale=' + locale, width: 1200, height: 630, alt: 'Ruyo.uz' }],
+      images: [{ url: 'https://www.ruyo.uz/api/og?title=Ruyo.uz+%E2%80%94+%D0%A1%D0%BE%D0%BD%D0%BD%D0%B8%D0%BA+%D0%B8+%D0%B3%D0%BE%D1%80%D0%BE%D1%81%D0%BA%D0%BE%D0%BF&emoji=%F0%9F%8C%99&type=dream&locale=' + locale, width: 1200, height: 630, alt: 'Ruyo.uz' }],
     },
     robots: { index: true, follow: true },
     verification: { google: 'ZzuUJFm-AAc7zr0PwjFu5_Qd40Nykq7JgXTPvb8Jjc8' },
@@ -62,7 +62,9 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   if (!routing.locales.includes(locale as 'ru' | 'uz')) notFound();
-  const messages = await getMessages();
+  // Without this next-intl reads request headers and every page becomes dynamic
+  setRequestLocale(locale);
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale} className={`${inter.variable} ${playfair.variable}`}>

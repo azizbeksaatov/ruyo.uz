@@ -17,11 +17,14 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // With localePrefix:'as-needed', the default (ru) locale has no /ru/ prefix in URLs.
+  // Build hrefs and active-check paths without the prefix for ru.
+  const navBase = locale === 'ru' ? '' : `/${locale}`;
   const navLinks = [
-    { href: `/${locale}/sonnik`, label: t('sonnik') },
-    { href: `/${locale}/goroskop`, label: t('goroskop') },
-    { href: `/${locale}/imena`, label: t('names') },
-    { href: `/${locale}/testy`, label: t('tests') },
+    { href: `${navBase}/sonnik`,   label: t('sonnik') },
+    { href: `${navBase}/goroskop`, label: t('goroskop') },
+    { href: `${navBase}/imena`,    label: t('names') },
+    { href: `${navBase}/testy`,    label: t('tests') },
   ];
 
   const switchLocale = (newLocale: string) => {
@@ -55,7 +58,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center">
+          <Link href={navBase || '/'} className="flex items-center">
             <Image src="/logo_light.png" alt="Ruyo.uz" width={134} height={36} className="h-9 w-auto" priority />
           </Link>
 

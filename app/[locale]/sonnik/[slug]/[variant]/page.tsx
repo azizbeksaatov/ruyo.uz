@@ -1,19 +1,22 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getDreamBySlug, dreams } from '@/data/dreams';
-import { dreamsUz } from '@/data/dreams-uz';
-import { getTranslations } from 'next-intl/server';
+import { cache } from 'react';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import {
   VARIANTS, VARIANT_META, getDreamEmoji, getSlugDate, ogImageUrl,
   getVariantIslamicFaqs, type DreamVariant,
 } from '@/lib/discover';
 import { User, Users, Calendar, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import { fetchDreamBySlug, fetchDreamTitles } from '@/lib/dreams-db';
 
+const getDream = cache(fetchDreamBySlug);
+
+export const revalidate = 86400;
+
+// Empty list = render each variant on first visit, then serve it from the ISR cache
 export async function generateStaticParams() {
-  return dreams.flatMap((dream) =>
-    VARIANTS.map((variant) => ({ slug: dream.slug, variant }))
-  );
+  return [];
 }
 
 export async function generateMetadata({
@@ -21,21 +24,21 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; slug: string; variant: string }>;
 }): Promise<Metadata> {
-  const { locale, slug, variant } = await params;
+  const { locale, slug: rawSlug, variant } = await params;
+  const slug = decodeURIComponent(rawSlug);
   if (!VARIANTS.includes(variant as DreamVariant)) return {};
-  const dream = getDreamBySlug(slug);
+  const dream = await getDream(slug, locale);
   if (!dream) return {};
 
-  const uz = locale === 'uz' ? dreamsUz[slug] : undefined;
-  const title = uz?.title ?? dream.title;
-  const short = uz?.short ?? dream.short;
+  const title = dream.title;
+  const short = dream.short;
   const meta  = VARIANT_META[variant as DreamVariant];
 
   const discoverTitle = locale === 'uz' ? meta.uzTitle(title, slug) : meta.ruTitle(title, slug);
   const discoverDesc  = locale === 'uz' ? meta.uzDesc(title, short) : meta.ruDesc(title, short);
-  const emoji    = getDreamEmoji(slug, dream.tags);
+  const emoji    = getDreamEmoji(slug, dream.tags ?? []);
   const imageUrl = ogImageUrl({ title: discoverTitle, emoji, type: 'dream', locale });
-  const base     = locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz';
+  const base     = locale === 'uz' ? 'https://www.ruyo.uz/uz' : 'https://www.ruyo.uz';
   const canonical = `${base}/sonnik/${slug}/${variant}`;
 
   return {
@@ -44,8 +47,8 @@ export async function generateMetadata({
     alternates: {
       canonical,
       languages: {
-        ru: `https://ruyo.uz/sonnik/${slug}/${variant}`,
-        uz: `https://ruyo.uz/uz/sonnik/${slug}/${variant}`,
+        ru: `https://www.ruyo.uz/sonnik/${slug}/${variant}`,
+        uz: `https://www.ruyo.uz/uz/sonnik/${slug}/${variant}`,
       },
     },
     openGraph: {
@@ -67,33 +70,37 @@ export default async function DreamVariantPage({
 }: {
   params: Promise<{ locale: string; slug: string; variant: string }>;
 }) {
-  const { locale, slug, variant } = await params;
+  const { locale, slug: rawSlug, variant } = await params;
+  setRequestLocale(locale);
+  const slug = decodeURIComponent(rawSlug);
   if (!VARIANTS.includes(variant as DreamVariant)) notFound();
-  const dream = getDreamBySlug(slug);
+  const dream = await getDream(slug, locale);
   if (!dream) notFound();
 
   const t    = await getTranslations({ locale, namespace: 'sonnik' });
   const tNav = await getTranslations({ locale, namespace: 'nav' });
-  const uz   = locale === 'uz' ? dreamsUz[slug] : undefined;
 
   const content = {
-    title:   uz?.title   ?? dream.title,
-    short:   uz?.short   ?? dream.short,
-    full:    uz?.full    ?? dream.full,
-    forWoman: uz?.forWoman ?? dream.forWoman,
-    forMan:   uz?.forMan   ?? dream.forMan,
-    byDay:   uz?.byDay   ?? dream.byDay,
-    tags:    uz?.tags    ?? dream.tags,
+    title:    dream.title,
+    short:    dream.short,
+    full:     dream.full,
+    forWoman: dream.forWoman,
+    forMan:   dream.forMan,
+    byDay:    dream.byDay,
+    tags:     dream.tags,
   };
 
-  const base     = locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz';
+  // Related dreams from Supabase
+  const relatedDreams = await fetchDreamTitles(dream.related, locale);
+
+  const base     = locale === 'uz' ? 'https://www.ruyo.uz/uz' : 'https://www.ruyo.uz';
   const meta     = VARIANT_META[variant as DreamVariant];
   const h1       = locale === 'uz' ? meta.uzH1(content.title) : meta.ruH1(content.title);
   const leadText = locale === 'uz'
     ? meta.uzLead(content.title, content.full)
     : meta.ruLead(content.title, content.full);
 
-  const emoji    = getDreamEmoji(slug, dream.tags);
+  const emoji    = getDreamEmoji(slug, dream.tags ?? []);
   const ogUrl    = ogImageUrl({ title: h1, emoji, type: 'dream', locale });
   const pubDate  = getSlugDate(`${slug}-${variant}`);
   const today    = new Date().toISOString().split('T')[0];
@@ -121,11 +128,6 @@ export default async function DreamVariantPage({
         { q: `В какой день чаще снится ${content.title.toLowerCase()}?`, a: content.byDay.friday ?? content.short },
       ];
 
-  // Related dreams from dream.related
-  const relatedDreams = dream.related
-    .map((s) => dreams.find((d) => d.slug === s))
-    .filter(Boolean)
-    .slice(0, 5) as typeof dreams;
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -133,18 +135,18 @@ export default async function DreamVariantPage({
     headline: h1,
     description: heroText.slice(0, 160),
     image: [ogUrl],
-    author: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz' },
+    author: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://www.ruyo.uz' },
     publisher: {
-      '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz',
-      logo: { '@type': 'ImageObject', url: 'https://ruyo.uz/icon.png' },
+      '@type': 'Organization', name: 'Ruyo.uz', url: 'https://www.ruyo.uz',
+      logo: { '@type': 'ImageObject', url: 'https://www.ruyo.uz/icon.png' },
     },
     datePublished: pubDate,
     dateModified: today,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': locale === 'uz'
-        ? `https://ruyo.uz/uz/sonnik/${slug}/${variant}`
-        : `https://ruyo.uz/sonnik/${slug}/${variant}`,
+        ? `https://www.ruyo.uz/uz/sonnik/${slug}/${variant}`
+        : `https://www.ruyo.uz/sonnik/${slug}/${variant}`,
     },
   };
 
@@ -152,7 +154,7 @@ export default async function DreamVariantPage({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
+      { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://www.ruyo.uz' },
       { '@type': 'ListItem', position: 2, name: tNav('sonnik'), item: `${base}/sonnik` },
       { '@type': 'ListItem', position: 3, name: content.title, item: `${base}/sonnik/${slug}` },
       { '@type': 'ListItem', position: 4, name: h1,            item: `${base}/sonnik/${slug}/${variant}` },
@@ -319,19 +321,13 @@ export default async function DreamVariantPage({
                   {t('similar_dreams')}
                 </h3>
                 <div className="space-y-1">
-                  {relatedDreams.map((r) => {
-                    const rTitle = locale === 'uz' ? (dreamsUz[r.slug]?.title ?? r.title) : r.title;
-                    return (
-                      <Link
-                        key={r.slug}
-                        href={`/${locale}/sonnik/${r.slug}`}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors group"
-                      >
-                        <span className="text-base">🌙</span>
-                        <span className="text-sm text-stone-600 group-hover:text-violet-600 transition-colors">{rTitle}</span>
-                      </Link>
-                    );
-                  })}
+                  {relatedDreams.map((r) => (
+                    <Link key={r.slug} href={`/${locale}/sonnik/${r.slug}`}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors group">
+                      <span className="text-base">🌙</span>
+                      <span className="text-sm text-stone-600 group-hover:text-violet-600 transition-colors">{r.title}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}

@@ -1,8 +1,8 @@
-import { notFound } from 'next/navigation';
+﻿import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ORIGIN_LABELS } from '@/data/names';
 import { fetchNameBySlug, fetchRelatedNames } from '@/lib/names-db';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getNameDiscoverTitle, getNameDiscoverDescription, getSlugDate, ogImageUrl } from '@/lib/discover';
 import { Heart, Star, Hash } from 'lucide-react';
 import ShareButtons from '@/components/ShareButtons';
@@ -10,13 +10,22 @@ import type { Metadata } from 'next';
 
 export const revalidate = 3600;
 
+export async function generateStaticParams() {
+  const { createServerSupabase } = await import('@/lib/supabase');
+  const { data } = await createServerSupabase()
+    .from('names').select('slug').eq('status', 'approved');
+  const slugs = (data ?? []).map((r: { slug: string }) => r.slug);
+  return ['ru', 'uz'].flatMap(locale => slugs.map(slug => ({ locale, slug })));
+}
+
 const NAME_ORIGIN_EMOJI: Record<string, string> = {
   uzbek: '🏔️', arabic: '🌙', persian: '🌸', turkic: '⭐',
   slavic: '🌾', greek: '🏛️', latin: '🦅', hebrew: '✡️', scandinavian: '❄️',
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const { locale, slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const name = await fetchNameBySlug(slug, locale);
   if (!name) return {};
 
@@ -24,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const discoverTitle = getNameDiscoverTitle(name.name, slug, locale);
   const discoverDesc  = getNameDiscoverDescription(name.meaning, name.name, locale);
   const imageUrl = ogImageUrl({ title: discoverTitle, emoji, type: 'name', locale });
-  const canonical = locale === 'uz' ? `https://ruyo.uz/uz/imena/${slug}` : `https://ruyo.uz/imena/${slug}`;
+  const canonical = locale === 'uz' ? `https://www.ruyo.uz/uz/imena/${slug}` : `https://www.ruyo.uz/imena/${slug}`;
 
   return {
     title: discoverTitle,
@@ -32,8 +41,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     alternates: {
       canonical,
       languages: {
-        ru: `https://ruyo.uz/imena/${slug}`,
-        uz: `https://ruyo.uz/uz/imena/${slug}`,
+        ru: `https://www.ruyo.uz/imena/${slug}`,
+        uz: `https://www.ruyo.uz/uz/imena/${slug}`,
       },
     },
     openGraph: {
@@ -61,7 +70,9 @@ const ORIGIN_EMOJI: Record<string, string> = {
 };
 
 export default async function NamePage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
-  const { locale, slug } = await params;
+  const { locale, slug: rawSlug } = await params;
+  setRequestLocale(locale);
+  const slug = decodeURIComponent(rawSlug);
   const name = await fetchNameBySlug(slug, locale);
   if (!name) notFound();
 
@@ -72,7 +83,7 @@ export default async function NamePage({ params }: { params: Promise<{ locale: s
   const relatedNames = await fetchRelatedNames(name.origin, name.slug, 6, locale);
   const originLabel = ORIGIN_LABELS[name.origin][localeKey];
 
-  const canonical = locale === 'uz' ? `https://ruyo.uz/uz/imena/${name.slug}` : `https://ruyo.uz/imena/${name.slug}`;
+  const canonical = locale === 'uz' ? `https://www.ruyo.uz/uz/imena/${name.slug}` : `https://www.ruyo.uz/imena/${name.slug}`;
   const discoverTitle = getNameDiscoverTitle(name.name, name.slug, locale);
   const discoverDesc  = getNameDiscoverDescription(name.meaning, name.name, locale);
   const ogUrl = ogImageUrl({ title: discoverTitle, emoji: ORIGIN_EMOJI[name.origin] ?? '✨', type: 'name', locale });
@@ -95,10 +106,10 @@ export default async function NamePage({ params }: { params: Promise<{ locale: s
     headline: discoverTitle,
     description: discoverDesc,
     image: [ogUrl],
-    author: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz' },
+    author: { '@type': 'Organization', name: 'Ruyo.uz', url: 'https://www.ruyo.uz' },
     publisher: {
-      '@type': 'Organization', name: 'Ruyo.uz', url: 'https://ruyo.uz',
-      logo: { '@type': 'ImageObject', url: 'https://ruyo.uz/icon.png' },
+      '@type': 'Organization', name: 'Ruyo.uz', url: 'https://www.ruyo.uz',
+      logo: { '@type': 'ImageObject', url: 'https://www.ruyo.uz/icon.png' },
     },
     datePublished: getSlugDate(name.slug),
     dateModified: new Date().toISOString().split('T')[0],
@@ -109,8 +120,8 @@ export default async function NamePage({ params }: { params: Promise<{ locale: s
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://ruyo.uz' },
-      { '@type': 'ListItem', position: 2, name: tNav('names'), item: locale === 'uz' ? 'https://ruyo.uz/uz/imena' : 'https://ruyo.uz/imena' },
+      { '@type': 'ListItem', position: 1, name: 'Ruyo.uz', item: 'https://www.ruyo.uz' },
+      { '@type': 'ListItem', position: 2, name: tNav('names'), item: locale === 'uz' ? 'https://www.ruyo.uz/uz/imena' : 'https://www.ruyo.uz/imena' },
       { '@type': 'ListItem', position: 3, name: name.name, item: canonical },
     ],
   };

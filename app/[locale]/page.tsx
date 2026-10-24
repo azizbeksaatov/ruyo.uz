@@ -1,23 +1,26 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
-import { dreams, TRENDING_DREAMS } from '@/data/dreams';
-import { dreamUz } from '@/data/dreamTranslationsUz';
 import { zodiacSigns } from '@/data/horoscopes';
+import { fetchRandomDreams } from '@/lib/dreams-db';
 import { viralTests } from '@/data/tests';
+import { testTranslationsUz } from '@/data/testTranslationsUz';
 import DreamSearchForm from '@/components/DreamSearchForm';
 import ZodiacPicker from '@/components/ZodiacPicker';
 
+export const revalidate = 3600;
+
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'home' });
-  const trendingDreams = TRENDING_DREAMS.map((slug) => dreams.find((d) => d.slug === slug)).filter(Boolean);
+  const trendingDreams = await fetchRandomDreams(8, locale);
 
-  const siteUrl = locale === 'uz' ? 'https://ruyo.uz/uz' : 'https://ruyo.uz';
+  const siteUrl = locale === 'uz' ? 'https://www.ruyo.uz/uz' : 'https://www.ruyo.uz';
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Ruyo.uz',
-    url: 'https://ruyo.uz',
+    url: 'https://www.ruyo.uz',
     potentialAction: {
       '@type': 'SearchAction',
       target: { '@type': 'EntryPoint', urlTemplate: `${siteUrl}/sonnik?q={search_term_string}` },
@@ -29,8 +32,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Ruyo.uz',
-    url: 'https://ruyo.uz',
-    logo: { '@type': 'ImageObject', url: 'https://ruyo.uz/logo.png' },
+    url: 'https://www.ruyo.uz',
+    logo: { '@type': 'ImageObject', url: 'https://www.ruyo.uz/logo.png' },
     sameAs: ['https://t.me/ruyouz_ru'],
   };
 
@@ -87,7 +90,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {trendingDreams.map((dream) => dream && (
+          {trendingDreams.map((dream) => (
             <Link
               key={dream.slug}
               href={`/${locale}/sonnik/${dream.slug}`}
@@ -95,10 +98,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             >
               <div className="text-2xl mb-2">🌙</div>
               <div className="font-semibold text-stone-900 group-hover:text-violet-700 transition-colors text-sm">
-                {locale === 'uz' ? (dreamUz[dream.slug]?.title ?? dream.title) : dream.title}
+                {dream.title}
               </div>
               <div className="text-xs text-stone-500 mt-1 line-clamp-2 leading-relaxed">
-                {locale === 'uz' ? (dreamUz[dream.slug]?.short ?? dream.short) : dream.short}
+                {dream.short}
               </div>
             </Link>
           ))}
@@ -158,7 +161,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {viralTests.map((test) => (
+          {viralTests.map((test) => {
+            const tUz = locale === 'uz' ? testTranslationsUz[test.slug] : null;
+            const tTitle = tUz?.title ?? test.title;
+            const tDescription = tUz?.description ?? test.description;
+            const tCategory = tUz?.category ?? test.category;
+            return (
             <Link
               key={test.slug}
               href={`/${locale}/testy/${test.slug}`}
@@ -166,15 +174,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             >
               <div className="text-4xl mb-3">{test.emoji}</div>
               <span className="text-xs text-pink-600 font-medium bg-pink-50 px-2 py-0.5 rounded-full">
-                {test.category}
+                {tCategory}
               </span>
               <h3 className="font-semibold text-stone-900 mt-3 mb-2 group-hover:text-pink-700 transition-colors leading-snug">
-                {test.title}
+                {tTitle}
               </h3>
-              <p className="text-sm text-stone-500 line-clamp-2">{test.description}</p>
+              <p className="text-sm text-stone-500 line-clamp-2">{tDescription}</p>
               <div className="mt-4 text-sm text-pink-600 font-medium">{t('test_take')}</div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </section>
 

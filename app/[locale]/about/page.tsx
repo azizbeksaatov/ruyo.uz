@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Send } from 'lucide-react';
@@ -10,8 +11,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       ? "Ruyo.uz — O'zbekiston va MDH uchun tushlar, goroskoplar va ismlar ma'nosini bilish bo'yicha yetakchi sayt."
       : 'Ruyo.uz — ведущий сайт о снах, гороскопах и значении имён для Узбекистана и СНГ.',
     alternates: {
-      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/about' : 'https://ruyo.uz/about',
-      languages: { ru: 'https://ruyo.uz/about', uz: 'https://ruyo.uz/uz/about' },
+      canonical: locale === 'uz' ? 'https://www.ruyo.uz/uz/about' : 'https://www.ruyo.uz/about',
+      languages: { ru: 'https://www.ruyo.uz/about', uz: 'https://www.ruyo.uz/uz/about' },
     },
     robots: { index: true, follow: true },
   };
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 

@@ -1524,4 +1524,311 @@ export const testTranslationsUz: Record<string, TestUz> = {
       },
     ],
   },
+  'stil-myshleniya': {
+    title: "Qanday fikrlaysiz?",
+    description: "Vizioner, tahlilchi, amaliyotchi yoki sezgir — o'z fikrlash uslubingizni toping",
+    category: "Psixologiya",
+    questions: [
+      {
+        id: 1,
+        text: "Sizga murakkab vazifa berishdi. Birinchi navbatda nima qilasiz?",
+        options: [
+          { id: 'a', text: "Yakuniy natijani tasavvur qilaman — butun rasmni ko'raman" },
+          { id: 'b', text: "Bosqichlarga bo'lib, ketma-ket harakat qilaman" },
+          { id: 'c', text: "Shunga o'xshash holatlarda nima qilinganini ko'raman" },
+          { id: 'd', text: "Kutaman — javob o'zi \"kelishi\" kerak" },
+        ],
+      },
+      {
+        id: 2,
+        text: "Ma'lumotni eng yaxshi qanday eslab qolasiz?",
+        options: [
+          { id: 'a', text: "Ko'rish orqali — sxemalar, xaritalar, obrazlar" },
+          { id: 'b', text: "Tuzilma orqali — ro'yxatlar, toifalar, bog'liqliklar" },
+          { id: 'c', text: "Amaliyot orqali — o'zim sinab ko'rsam, eslab qolaman" },
+          { id: 'd', text: "His orqali — \"ta'sir qilsa\", umrbod eslayman" },
+        ],
+      },
+      {
+        id: 3,
+        text: "Hamkasblaringiz yoki do'stlaringiz siz haqingizda nima deydi?",
+        options: [
+          { id: 'a', text: "\"Siz keng fikrlaysiz — hali yo'q narsani ko'rasiz\"" },
+          { id: 'b', text: "\"Boshqalar qaramaydigan joydan xatoni topasiz\"" },
+          { id: 'c', text: "\"Buni qanday qilishni bilasiz — ortiqcha gapsiz\"" },
+          { id: 'd', text: "\"Vaziyatni qandaydir oltinchi tuyg'u bilan his qilasiz\"" },
+        ],
+      },
+      {
+        id: 4,
+        text: "Boshqalarning qarorlarida sizni nima g'ashingizga tegadi?",
+        options: [
+          { id: 'a', text: "Mayda fikrlash va ko'ra bilmaslik" },
+          { id: 'b', text: "Izchilsizlik va faktlarni e'tiborsiz qoldirish" },
+          { id: 'c', text: "Shunchaki qilish o'rniga nazariya so'qish" },
+          { id: 'd', text: "Ravshan \"belgilar\" va hislarni e'tiborsiz qoldirishlari" },
+        ],
+      },
+      {
+        id: 5,
+        text: "Muhim qarorni qanday qabul qilasiz?",
+        options: [
+          { id: 'a', text: "Kelajakning barcha mumkin stsenariylarini tasavvur qilaman" },
+          { id: 'b', text: "Ma'lumot yig'ib, afzallik va kamchiliklarni tortaman" },
+          { id: 'c', text: "Tajribaga tayanaman — avval nima ishlagan bo'lsa" },
+          { id: 'd', text: "Ichki ovozimga quloq solaman" },
+        ],
+      },
+      {
+        id: 6,
+        text: "Murakkab narsani tushuntirishingiz kerak. Siz...",
+        options: [
+          { id: 'a', text: "O'xshatish yoki hikoya o'ylab topaman — rasm yaxlit bo'lsin" },
+          { id: 'b', text: "Mantiqiy qadamlarga bo'lib, xulosaga olib boraman" },
+          { id: 'c', text: "Hayotdan aniq misol keltiraman" },
+          { id: 'd', text: "Bu odamga aynan nima kerakligini his qilib, shuni aytaman" },
+        ],
+      },
+      {
+        id: 7,
+        text: "Sizning eng ko'p uchraydigan xatoyingiz:",
+        options: [
+          { id: 'a', text: "Haddan tashqari keng niyat qilib, tafsilotlarni yo'qotaman" },
+          { id: 'b', text: "Tahlilda qotib qolib, harakatni kechiktiraman" },
+          { id: 'c', text: "\"Ishlaydigan\" narsaga yopishib, yangisini qo'ldan chiqaraman" },
+          { id: 'd', text: "Boshqalarga tushuntirish qiyin bo'lgan hislarga tayanib qaror qilaman" },
+        ],
+      },
+    ],
+    results: [
+      {
+        id: 'visionary',
+        title: "Siz — Vizionersiz",
+        description: "Sizning ongingiz kelajakda yashaydi: hali yo'q narsani ko'rasiz va o'z dunyoqarashingiz bilan boshqalarni ilhomlantira olasiz. Buyuk g'oyalar aynan shunday fikrlaydigan odamlarda tug'iladi — me'morlar, asoschilar, strateglar. Siz uy qurmaysiz — xaritada hali yo'q shaharni barpo etasiz. Soyangiz: tafsilotlar va rutina sizni bo'g'adi, amalga oshirish ko'pincha o'z miqyosingizdan aziyat chekadi. O'sish nuqtangiz: ijrochi sherik toping — birgalikda imkonsiz narsaga qodir bo'lasiz.",
+      },
+      {
+        id: 'analyst',
+        title: "Siz — Tahlilchisiz",
+        description: "\"Nega\" ekanini tushunmaguncha tinchlanmaysiz. Aql — sizning aniqlik qurolingiz: qonuniyatlarni ko'rasiz, ziddiyatlarni topasiz va qarorni kayfiyatga emas, ma'lumotga tayanib qabul qilasiz. Odamlar xolisligingizni qadrlaydi — bahsli vaziyatlarda aynan sizga ishonishadi. Soyangiz: tahlil falaji — ba'zan \"hozirgi yaxshi qaror\" \"ertangi mukammal qaror\"dan afzal. O'sish nuqtangiz: barcha javoblarni kutmay harakat qiling — ular jarayonda o'zi paydo bo'ladi.",
+      },
+      {
+        id: 'practitioner',
+        title: "Siz — Amaliyotchisiz",
+        description: "Boshqalar muhokama qilayotganda — siz ish qilasiz. Tajribangiz va sog'lom fikringiz har qanday nazariyadan tezroq masalani hal qiladi, haqiqiy natija chiroyli so'zlardan muhimroq. Sizga murakkab ishlar ishonib topshiriladi — siz xafa qilmaysiz. Soyangiz: konservatizm — oldin ishlagan narsaga ko'nikib, yangisini qo'ldan chiqarishingiz mumkin. O'sish nuqtangiz: ba'zan o'zingizga tajriba qilishga ruxsat bering — tajribangiz uni boshqariladigan qiladi.",
+      },
+      {
+        id: 'intuitive',
+        title: "Siz — Sezgirsiz",
+        description: "Sizning kuchingiz mantiqqa bo'ysunmaydigan, lekin deyarli har doim to'g'ri chiqadigan hislarda. Siz vaziyatni yaxlit his qilasiz — boshqalar alohida notalarni ajratayotganda, musiqachi butun orkestrni eshitgandek. Bunday uslubdagi odamlar ko'pincha ajoyib psixologlar, yetakchilar va rassomlar bo'lishadi. Soyangiz: qarorlaringizni boshqalarga tushuntirish qiyin — bu ta'siringizni pasaytiradi. O'sish nuqtangiz: hislarni so'zga aylantirishni o'rganing, shunda g'oyalaringiz nafaqat to'g'ri, balki eshitiladigan ham bo'ladi.",
+      },
+    ],
+  },
+  'toksichnaya-cherta': {
+    title: "Sizning zaharli xususiyatingiz qaysi?",
+    description: "Halol test — har kimda bor. O'zingizniki bilan tanishing va undan xalos bo'ling",
+    category: "Psixologiya",
+    questions: [
+      {
+        id: 1,
+        text: "Sizni tanqid qilishganda qanday munosabat bildirasiz?",
+        options: [
+          { id: 'a', text: "Tashqaridan rozi bo'laman, ichimda alam qaynaydi" },
+          { id: 'b', text: "Darhol tanqidchi nega noto'g'ri ekanini tushuntiraman" },
+          { id: 'c', text: "Eng yomonini o'ylay boshlayman — men dahshatliman" },
+          { id: 'd', text: "Jim turaman, lekin keyin odamdan uzoqlashaman" },
+        ],
+      },
+      {
+        id: 2,
+        text: "O'zingizni yomon his qilganda nima qilasiz?",
+        options: [
+          { id: 'a', text: "Yomonligimga ishora qilaman, so'rashlarini kutaman" },
+          { id: 'b', text: "Baland va ochiq gapiraman — ba'zan haddan tashqari" },
+          { id: 'c', text: "Xavotirga sho'ng'ib, hamma narsani kuchaytiraman" },
+          { id: 'd', text: "G'oyib bo'laman — javob bermayman, o'zimga yopilaman" },
+        ],
+      },
+      {
+        id: 3,
+        text: "Kimdir sizni yarim yo'lda qoldirsa, nima qilasiz?",
+        options: [
+          { id: 'a', text: "\"Hammasi yaxshi\" deyman, lekin ichimda yaxshi emas" },
+          { id: 'b', text: "Darhol xatoni ko'rsataman — ba'zan qattiq" },
+          { id: 'c', text: "Odamlar doim men bilan shunday qilishadi, deb o'ylay boshlayman" },
+          { id: 'd', text: "Unga tayanishni to'xtataman va uzoqlashaman" },
+        ],
+      },
+      {
+        id: 4,
+        text: "Hasad qilganingizda o'zingizni qanday tutasiz?",
+        options: [
+          { id: 'a', text: "Jilmayib tabriklayman, lekin ichimda g'am" },
+          { id: 'b', text: "Menda ham bor yoki tez orada bo'ladi, deyman" },
+          { id: 'c', text: "Solishtira boshlayman va o'zimni past his qilaman" },
+          { id: 'd', text: "O'sha odamdan qochaman — bu hissni his qilgim kelmaydi" },
+        ],
+      },
+      {
+        id: 5,
+        text: "Mojaroda ko'pincha nima qilasiz?",
+        options: [
+          { id: 'a', text: "Bo'ysunaman, lekin keyin mayda narsalarda portlayman" },
+          { id: 'b', text: "O'z pozitsiyamni g'alabagacha himoya qilaman" },
+          { id: 'c', text: "Falokatlashtiraman — \"hammasi yomon, bu oxiri\"" },
+          { id: 'd', text: "Javob berishni to'xtataman — sukut mening javobim" },
+        ],
+      },
+      {
+        id: 6,
+        text: "Yordam so'rashni qanday uddalaysiz?",
+        options: [
+          { id: 'a', text: "Qiyinchilik bilan — ishora qilaman, kutaman, tushunmaganlaridan jahlim chiqadi" },
+          { id: 'b', text: "Qiyinchilik bilan — kuchsiz ko'rinishdan qo'rqaman" },
+          { id: 'c', text: "Qiyinchilik bilan — muammom juda katta tuyuladi" },
+          { id: 'd', text: "Qiyinchilik bilan — o'zim hal qilgan osonroq" },
+        ],
+      },
+      {
+        id: 7,
+        text: "Boshqalarda sizni eng ko'p nima jahlingizni chiqaradi?",
+        options: [
+          { id: 'a', text: "Menga nima kerakligini sezmasliklari" },
+          { id: 'b', text: "Men haq ekanimni tan olmasliklari" },
+          { id: 'c', text: "\"Xavotir olma\" deyishlari — bu yordam bermaydi" },
+          { id: 'd', text: "Yolg'iz qolishim kerak bo'lganda yopishib olishlari" },
+        ],
+      },
+      {
+        id: 8,
+        text: "Bu testni o'qiyotib nima deb o'ylayapsiz?",
+        options: [
+          { id: 'a', text: "\"Qiziq, do'stlarim bu haqda nima deyishar ekan\"" },
+          { id: 'b', text: "\"Umid qilamanki, natija juda yomon bo'lmaydi\"" },
+          { id: 'c', text: "\"Balki menda eng yomoni chiqar?\"" },
+          { id: 'd', text: "\"Hmm. Ko'ramiz. Bilishni xohlaymanmi, ishonchim komil emas\"" },
+        ],
+      },
+    ],
+    results: [
+      {
+        id: 'passive',
+        title: "Sizning zaharli xususiyatingiz — Passiv tajovuz",
+        description: "Hech narsa yaxshi bo'lmaganda \"hammasi yaxshi\" deysiz — va boshqalar o'zi sezishini kutasiz. Bu xarakter zaifligi emas, balki himoya usuli: ehtiyojlarni to'g'ridan-to'g'ri aytish bir vaqtlar xavfli bo'lgani uchun shakllangan. Atrofdagilar keskinlikni his qiladi, qayerdan ekanini tushunmaydi va bu munosabatlarni ochiq mojarodan sekinroq, lekin ishonchliroq buzadi. Yaxshi xabar: ochiq gapira boshlaganingizda — avval qo'rqinchli, keyin ozod qiladi. Bir hafta jim yurish o'rniga bitta halol \"menga og'ir bo'ldi\" deb ko'ring.",
+      },
+      {
+        id: 'defensive',
+        title: "Sizning zaharli xususiyatingiz — Himoyalanish reaksiyasi",
+        description: "Tanqidni hujum deb qabul qilasiz va darhol barrikada qurasiz — dalillar, qarshi ayblovlar yoki manbani qadrsizlantirish bilan. Buning ortida haq bo'lish va qabul qilinishga bo'lgan chuqur istak turadi — bu insoniy. Lekin muammo shundaki, himoya sizga haqiqatan yordam beradigan fikr-mulohazadan to'sib qo'yadi. Atrofdagilar halol gapirish o'rniga jim bo'la boshlaydi. Sinab ko'ring: keyingi safar e'tiroz bildirgingiz kelganda — to'xtab, \"sizni aynan nima xafa qildi?\" deb so'rang.",
+      },
+      {
+        id: 'spiral',
+        title: "Sizning zaharli xususiyatingiz — Falokatlashtirish",
+        description: "Siz kichik muammoni global falokatga aylantirishni bilasiz — tez va ishonarli. Bitta omadsiz kun \"menda hech qachon hech narsa chiqmaydi\"ga aylanadi. Bu to'qima ham, zaiflik ham emas — avtopilotda eng yomon stsenariyni qidiradigan asab tizimining xususiyati. Muammo shundaki, haqiqiy xavf bo'lmaganda ham doimiy tarangligida yashaysiz. O'zingizdan so'rab ko'ring: \"Bir haftadan keyin haqiqatda nima bo'ladi?\" — ko'pincha javob tinchlantiradi.",
+      },
+      {
+        id: 'withdraw',
+        title: "Sizning zaharli xususiyatingiz — Hissiy chekinish",
+        description: "Og'riganda g'oyib bo'lasiz — javob bermaysiz, uzoqlashasiz, o'zingizga yopilasiz. Bu xavfsiz tuyuladi: sizni xafa qilmasa — siz ham xafa qilmaysiz. Lekin yoningizdagilar uchun sukutingiz har qanday so'zdan balandroq jaranglaydi va deyarli doim rad etish sifatida qabul qilinadi. O'zingizni himoya qilasiz, lekin aloqalarni buzasiz. Yaxshi xabar: hammasini birdaniga aytishingiz shart emas. \"Menga hozir vaqt kerak, lekin g'oyib bo'lmayapman\" deyish kifoya. Bu hamma narsani o'zgartiradi.",
+      },
+    ],
+  },
+  'ty-v-konflikte': {
+    title: "Mojaroda qandaysiz?",
+    description: "Bahsdagi strategiyangiz siz haqingizda ko'p narsani aytadi — o'z uslubingizni bilib oling",
+    category: "Psixologiya",
+    questions: [
+      {
+        id: 1,
+        text: "Mojaro endigina boshlandi. Birinchi lahzada nimani his qilasiz?",
+        options: [
+          { id: 'a', text: "Adrenalin — jangga tayyorman" },
+          { id: 'b', text: "Xavotir — tezroq tugasa deyman" },
+          { id: 'c', text: "Ravshanlik — vaziyatni tahlil qila boshlayman" },
+          { id: 'd', text: "Charchoq — yana shu narsalar" },
+        ],
+      },
+      {
+        id: 2,
+        text: "Bahsda odatda qanday g'olib chiqasiz?",
+        options: [
+          { id: 'a', text: "Raqib taslim bo'lguncha dalillar bilan bosaman" },
+          { id: 'b', text: "Ikkala tomonga ham yoqadigan narsa topaman" },
+          { id: 'c', text: "Faktlarni ko'rsataman — ular bilan bahslashib bo'lmaydi" },
+          { id: 'd', text: "Ba'zan tugasin deb shunchaki rozi bo'laman" },
+        ],
+      },
+      {
+        id: 3,
+        text: "Mojarodan qochadigan odamlar haqida nima deb o'ylaysiz?",
+        options: [
+          { id: 'a', text: "Hurmat qilaman, lekin o'zim qila olmayman — adolatsizlik ta'sir qiladi" },
+          { id: 'b', text: "Tushunaman — mojaro hech kimga foyda bermaydi" },
+          { id: 'c', text: "Aralashmagan ma'qul mojarolar bor, bu oqilona" },
+          { id: 'd', text: "Bu men — va bunda yomon narsa ko'rmayman" },
+        ],
+      },
+      {
+        id: 4,
+        text: "Mojarodan keyin nima bo'ladi?",
+        options: [
+          { id: 'a', text: "G'alaba qozonsam ham uzoq tinchlana olmayman" },
+          { id: 'b', text: "Tinchlik bilan hal bo'lsa, yengil tortaman" },
+          { id: 'c', text: "Nima deyilganini va nimani yaxshiroq qilsa bo'lganini tahlil qilaman" },
+          { id: 'd', text: "Iloji boricha tezroq unutishga harakat qilaman" },
+        ],
+      },
+      {
+        id: 5,
+        text: "Mojaroda siz uchun nima muhimroq?",
+        options: [
+          { id: 'a', text: "O'z haqligimni va pozitsiyamni himoya qilish" },
+          { id: 'b', text: "Munosabatlarni saqlash va murosa topish" },
+          { id: 'c', text: "Ob'ektiv haqiqatni topish" },
+          { id: 'd', text: "Tezroq tugashi" },
+        ],
+      },
+      {
+        id: 6,
+        text: "Kimdir ovozini ko'targanda qanday munosabat bildirasiz?",
+        options: [
+          { id: 'a', text: "O'zimniki ham ko'tariladi — bu refleks" },
+          { id: 'b', text: "Keskinlikni kamaytirish uchun sekinroq gapirishga harakat qilaman" },
+          { id: 'c', text: "Tinch gapirishni so'rayman — bunday muloqot qilib bo'lmaydi" },
+          { id: 'd', text: "Jim bo'laman yoki ketaman" },
+        ],
+      },
+      {
+        id: 7,
+        text: "Mojarodagi uslubingiz haqida nima deb o'ylaysiz?",
+        options: [
+          { id: 'a', text: "Men juda jizzakiman — bilaman, ustida ishlayapman" },
+          { id: 'b', text: "Men juda yumshoqman — ba'zan bu menga qarshi ishlatiladi" },
+          { id: 'c', text: "Men juda ratsionalman — odamlar bundan g'ashlanadi" },
+          { id: 'd', text: "Men juda qochaman — muammolar to'planib boradi" },
+        ],
+      },
+    ],
+    results: [
+      {
+        id: 'fighter',
+        title: "Sizning uslubingiz — Jangchi",
+        description: "Siz mojarodan qochmaysiz — unga to'liq tayyorlik bilan kirasiz. Adolatsizlik, qadriyatlaringiz yoki yaqinlaringiz manfaatlarining buzilishi sizda himoya rejimini darhol yoqadi. Bu kuch — muhim narsani himoya qila olasiz. Soyangiz: shiddat bahslarni yutadi, lekin ba'zan munosabatlarni yutqazadi. Odamlar yoningizda ehtiyotkor bo'la boshlaydi. O'sish nuqtangiz: \"adolat uchun kurash\" bilan \"o'z egoing uchun kurash\"ni farqlashni o'rganing — birinchisiga arziydi, ikkinchisiga yo'q.",
+      },
+      {
+        id: 'peacemaker',
+        title: "Sizning uslubingiz — Sulhparvar",
+        description: "Siz instinktiv ravishda hammaga to'g'ri keladigan yo'lni izlaysiz — bu qimmatli qobiliyat. Faqat borligingiz bilan keskinlikni pasaytirasiz va boshqalar faqat qarama-qarshilikni ko'radigan joyda murosa topa olasiz. Soyangiz: tinchlik istagida o'z manfaatlaringizni kerakdan ko'proq qurbon qilib, bir kun otilib chiqadigan alamni to'plashingiz mumkin. O'sish nuqtangiz: tinchlik faqat o'zingizga nima kerakligi haqida halol bo'lgandagina mumkin.",
+      },
+      {
+        id: 'analyst',
+        title: "Sizning uslubingiz — Tahlilchi",
+        description: "Mojaroda his-tuyg'ulardan oldin aqlni yoqasiz. Faktlar, mantiq va adolatli yechim izlaysiz — bu sizni har qanday bahsning qadrli ishtirokchisiga aylantiradi. Vaziyatga chetdan qarashni bilasiz. Soyangiz: mojarodagi odamlar ko'pincha tahlil qilinishni emas, his qilinishni xohlaydi — sizning ratsionalligingiz sovuqlik kabi tuyulishi mumkin. O'sish nuqtangiz: yechim taklif qilishdan oldin ba'zan \"og'rinayotganingni tushunaman\" deyish kifoya.",
+      },
+      {
+        id: 'avoider',
+        title: "Sizning uslubingiz — Qochuvchi",
+        description: "Siz instinktiv ravishda mojarodan chetga chiqasiz — va bunda yolg'iz emassiz. Mojaro munosabatlarga tahdid kabi tuyuladi, shuning uchun jim turib kutish osonroq. Muammo shundaki, muammolar yo'qolmaydi — ular to'planib, keyinroq kuchliroq portlaydi. Soyangiz: qochish qisqa muddatli tinchlik va uzoq muddatli masofa beradi. O'sish nuqtangiz: hozirgi halol kichik mojaro — yillarga munosabatlarga qo'yilgan sarmoya.",
+      },
+    ],
+  },
 };

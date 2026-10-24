@@ -176,7 +176,9 @@ export const VARIANT_META: Record<DreamVariant, VariantMeta> = {
   },
   'islamskiy': {
     ruTitle:  (n, s) => `Исламский сонник: ${n.toLowerCase()} во сне — что говорит ислам`,
-    uzTitle:  (n, s) => `Islomiy tush ta'biri: tushda ${n.toLowerCase()} ko'rish`,
+    uzTitle:  (n, s) => slugHash(s) % 2 === 0
+      ? `Tushda ${n.toLowerCase()} ko'rish — Ibn Sirin talqini va islomiy ta'bir`
+      : `Islomiy tush ta'biri: tushda ${n.toLowerCase()} ko'rish | Ibn Sirin`,
     ruDesc:   (n, sh) => `Значение сна о ${n.toLowerCase()} в исламе: толкование Ибн Сирина, что говорит Коран о снах. ${sh.slice(0, 90)}`,
     uzDesc:   (n, sh) => `Tushda ${n.toLowerCase()} ko'rishning islomiy ma'nosi: Ibn Sirin talqini. ${sh.slice(0, 90)}`,
     ruH1:     (n) => `Исламский сонник: ${n.toLowerCase()} во сне`,
@@ -215,5 +217,5 @@ export function ogImageUrl(params: {
     type: params.type,
     locale: params.locale,
   });
-  return `https://ruyo.uz/api/og?${p.toString()}`;
+  return `https://www.ruyo.uz/api/og?${p.toString()}`;
 }

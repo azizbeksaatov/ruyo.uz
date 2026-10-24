@@ -1,42 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const KEYWORD_INTERPRETATIONS: Record<string, string> = {
-  змея: 'Змея в вашем сне — сильный символ трансформации. Контекст, который вы описали, указывает на скрытые изменения в вашей жизни. Обратите внимание на отношения с людьми, которые могут быть неискренни.',
-  зубы: 'Ваш сон о зубах отражает уровень тревоги и контроля над жизненными ситуациями. Детали, которые вы описали, говорят о необходимости уделить больше внимания своей уверенности в себе.',
-  вода: 'Вода в вашем сне — зеркало ваших эмоций. Описанные вами детали указывают на эмоциональный поток, который вы сейчас переживаете. Доверяйте своей интуиции.',
-  огонь: 'Огонь в вашем сне говорит о мощной внутренней энергии. Ситуация, которую вы описали, указывает на страсть и желание перемен.',
-  дом: 'Ваш сон о доме — отражение вашего психологического состояния. Детали говорят о вашем отношении к семье и безопасности.',
-};
-
-function generateRuleBasedInterpretation(dreamText: string): string {
-  const text = dreamText.toLowerCase();
-
-  for (const [keyword, interpretation] of Object.entries(KEYWORD_INTERPRETATIONS)) {
-    if (text.includes(keyword)) {
-      return interpretation;
-    }
+// Simple in-memory rate limit: 5 requests per IP per hour
+const ipMap = new Map<string, { count: number; resetAt: number }>();
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = ipMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    ipMap.set(ip, { count: 1, resetAt: now + 3_600_000 });
+    return false;
   }
-
-  const emotions = text.includes('страх') || text.includes('боял') || text.includes('ужас')
-    ? 'Сон несёт тревожные эмоции, что говорит о стрессе в реальной жизни.'
-    : text.includes('радост') || text.includes('счаст') || text.includes('смеял')
-    ? 'Позитивные эмоции во сне — хороший знак. Подсознание посылает вам оптимистичный сигнал.'
-    : 'Ваш сон несёт нейтральный эмоциональный фон.';
-
-  const hasOtherPeople = text.includes('люди') || text.includes('человек') || text.includes('друг') || text.includes('родител') || text.includes('семья');
-  const socialPart = hasOtherPeople
-    ? ' Присутствие других людей в сне указывает на важность социальных связей в данный момент.'
-    : '';
-
-  return `${emotions}${socialPart} Прислушайтесь к своим ощущениям после пробуждения — они подскажут правильное направление.`;
+  if (entry.count >= 5) return true;
+  entry.count++;
+  return false;
 }
 
 export async function POST(req: NextRequest) {
-  let dream: string;
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { error: ip === 'unknown' ? 'Too many requests' : 'Too many requests. Try again in an hour.' },
+      { status: 429 }
+    );
+  }
+  let dream: string, context: string, locale: string;
   try {
     const body = await req.json();
-    dream = body.dream;
+    dream   = body.dream   ?? '';
+    context = body.context ?? '';
+    locale  = body.locale  ?? 'ru';
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
@@ -45,27 +36,127 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Dream text required' }, { status: 400 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const groqKey  = process.env.GROQ_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
 
-  if (apiKey) {
-    try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const result = await model.generateContent(
-        `Ты — опытный толкователь снов для аудитории из Узбекистана и СНГ.
-Дай персональное толкование сна (2-3 абзаца, не более 200 слов).
-Описание сна пользователя: "${dream}".
-Пиши на русском языке, тепло и доступно. Толкуй только то, что описал пользователь.`
-      );
-
-      const interpretation = result.response.text();
-      return NextResponse.json({ interpretation });
-    } catch (geminiError) {
-      console.error('Gemini API error:', geminiError instanceof Error ? geminiError.message : geminiError);
-    }
+  if (groqKey) {
+    const result = await callGroq(dream, context, locale, groqKey);
+    if (result) return NextResponse.json({ interpretation: result });
   }
 
-  const interpretation = generateRuleBasedInterpretation(dream);
-  return NextResponse.json({ interpretation });
+  if (geminiKey) {
+    const result = await callGemini(dream, context, locale, geminiKey);
+    if (result) return NextResponse.json({ interpretation: result });
+  }
+
+  return NextResponse.json({ interpretation: fallback(dream, locale) });
+}
+
+function buildPrompt(dream: string, context: string, locale: string): string {
+  const isUz = locale === 'uz';
+  const contextHint = context
+    ? (isUz
+        ? `Bu tush "${context}" mavzusiga oid sahifada so'ralmoqda.`
+        : `Пользователь находится на странице сна о «${context}».`)
+    : '';
+
+  if (isUz) {
+    return `Sen O'rta Osiyo va MDH auditoriyasi uchun tush ta'biri bo'yicha mutaxassissan.
+${contextHint}
+Foydalanuvchi tushini quyidagicha tasvirlab berdi: "${dream}"
+
+Foydalanuvchi tasvirlagan narsalarga asoslanib, shaxsiy ta'bir yoz (2-3 xatboshi, 150-250 so'z).
+O'zbek tilida yoz — iliq, qisqa va tushunarli tarzda.
+Faqat foydalanuvchi aytgan narsalarni talqin qil, umumiy gaplar aytma.`;
+  }
+
+  return `Ты — опытный толкователь снов для аудитории из Узбекистана и СНГ.
+${contextHint}
+Пользователь описал свой сон: "${dream}"
+
+Напиши персональное толкование (2-3 абзаца, 150-250 слов) строго по тому, что описал пользователь.
+Пиши на русском языке — тепло, ёмко, по существу.
+Не используй общие фразы вроде «этот сон означает перемены» без связи с конкретными деталями сна.`;
+}
+
+async function callGroq(dream: string, context: string, locale: string, apiKey: string): Promise<string | null> {
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: buildPrompt(dream, context, locale) }],
+        max_tokens: 400,
+        temperature: 0.7,
+      }),
+    });
+    if (!res.ok) {
+      console.error('Groq error:', res.status, await res.text());
+      return null;
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? null;
+  } catch (err) {
+    console.error('Groq fetch error:', err);
+    return null;
+  }
+}
+
+async function callGemini(dream: string, context: string, locale: string, apiKey: string): Promise<string | null> {
+  const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-pro'];
+  const prompt = buildPrompt(dream, context, locale);
+
+  for (const model of models) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        }
+      );
+      if (!res.ok) continue;
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+function fallback(dream: string, locale: string): string {
+  const text = dream.toLowerCase();
+  const isUz = locale === 'uz';
+
+  const hasPositive = /радост|счаст|смеял|весел|летел|полёт/.test(text)
+    || /baxt|quvon|chiroyl|yaxshi|uchdim|parvoz/.test(text);
+  const hasNegative = /страх|боял|ужас|бежал|упал|темнот/.test(text)
+    || /qo'rq|dahshat|qochd|qorong|yiqild/.test(text);
+  const hasPeople = /люди|человек|друг|родител|семья|муж|жена|мать|отец/.test(text)
+    || /odamlar|do'st|oila|er|xotin|ona|ota/.test(text);
+
+  if (isUz) {
+    const emotion = hasPositive
+      ? "Tushingizda ijobiy his-tuyg'ular bor — bu ong osti yaxshi signal yuborayotganini bildiradi."
+      : hasNegative
+      ? "Tushingizda tashvish seziladi — bu haqiqiy hayotdagi stress yoki hal etilmagan muammolarni aks ettirishi mumkin."
+      : "Tushingiz neytral kayfiyatda — ong osti biror narsani qayta ishlayapti.";
+    const social = hasPeople ? " Tushda boshqa odamlar borligi hozirda ijtimoiy munosabatlar muhim ekanini ko'rsatadi." : "";
+    return `${emotion}${social} Uyg'ongandan keyingi his-tuyg'ularingizga quloq soling — ular to'g'ri yo'lni ko'rsatadi.`;
+  }
+
+  const emotion = hasPositive
+    ? "Позитивные эмоции во сне — хороший знак. Подсознание посылает оптимистичный сигнал."
+    : hasNegative
+    ? "Тревожные эмоции в сне отражают стресс или нерешённые вопросы в реальной жизни."
+    : "Ваш сон несёт нейтральный эмоциональный фон — подсознание обрабатывает события дня.";
+  const social = hasPeople ? " Присутствие других людей говорит о важности социальных связей в данный момент." : "";
+  return `${emotion}${social} Прислушайтесь к своим ощущениям после пробуждения — они подскажут правильное направление.`;
 }

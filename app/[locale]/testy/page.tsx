@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { viralTests } from '@/data/tests';
 import { testTranslationsUz } from '@/data/testTranslationsUz';
@@ -11,14 +11,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('title'),
     description: t('subtitle'),
     alternates: {
-      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/testy' : 'https://ruyo.uz/testy',
-      languages: { ru: 'https://ruyo.uz/testy', uz: 'https://ruyo.uz/uz/testy' },
+      canonical: locale === 'uz' ? 'https://www.ruyo.uz/uz/testy' : 'https://www.ruyo.uz/testy',
+      languages: { ru: 'https://www.ruyo.uz/testy', uz: 'https://www.ruyo.uz/uz/testy' },
     },
   };
 }
 
 export default async function TestsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'tests' });
   const isUz = locale === 'uz';
 

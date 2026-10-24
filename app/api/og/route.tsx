@@ -29,14 +29,19 @@ export async function GET(req: NextRequest) {
 
   const fontSize = title.length > 55 ? 36 : title.length > 38 ? 44 : 52;
 
-  // Load font data for Cyrillic support
+  // Load font data for Cyrillic support. The file URL is resolved from the CSS
+  // because Google changes versioned font URLs (a hardcoded one 404'd and broke every image).
   let fontData: ArrayBuffer | null = null;
   try {
-    const res = await fetch(
-      'https://fonts.gstatic.com/s/notosans/v36/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7du2mhS2_M.woff',
-      { next: { revalidate: 86400 } }
-    );
-    fontData = await res.arrayBuffer();
+    const css = await fetch(
+      'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@700',
+      { headers: { 'User-Agent': 'Wget/1.0' }, next: { revalidate: 86400 } }
+    ).then((r) => (r.ok ? r.text() : ''));
+    const fontUrl = css.match(/src: url\((.+?\.ttf)\)/)?.[1];
+    if (fontUrl) {
+      const res = await fetch(fontUrl, { next: { revalidate: 86400 } });
+      if (res.ok) fontData = await res.arrayBuffer();
+    }
   } catch {
     // fallback: render without custom font
   }
@@ -121,6 +126,8 @@ export async function GET(req: NextRequest) {
     {
       width: 1200,
       height: 630,
+      // Same query → same image: let the CDN keep it instead of re-rendering per crawler
+      headers: { 'Cache-Control': 'public, max-age=86400, s-maxage=31536000, immutable' },
       ...(fontData ? {
         fonts: [{ name: 'NotoSans', data: fontData, style: 'normal', weight: 700 }],
       } : {}),

@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import PersonalHoroscopeForm from '@/components/PersonalHoroscopeForm';
 
@@ -9,10 +9,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('personal_title'),
     description: t('personal_subtitle'),
     alternates: {
-      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/goroskop/personalnyy' : 'https://ruyo.uz/goroskop/personalnyy',
+      canonical: locale === 'uz' ? 'https://www.ruyo.uz/uz/goroskop/personalnyy' : 'https://www.ruyo.uz/goroskop/personalnyy',
       languages: {
-        ru: 'https://ruyo.uz/goroskop/personalnyy',
-        uz: 'https://ruyo.uz/uz/goroskop/personalnyy',
+        ru: 'https://www.ruyo.uz/goroskop/personalnyy',
+        uz: 'https://www.ruyo.uz/uz/goroskop/personalnyy',
       },
     },
   };
@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function PersonalHoroscopePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'goroskop' });
 
   return (

@@ -9,7 +9,7 @@ interface Props {
   dreamTitle: string;
 }
 
-export default function DreamAiInterpreter({ dreamTitle }: Props) {
+export default function DreamAiInterpreter({ locale, dreamTitle }: Props) {
   const t = useTranslations('ai');
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
@@ -24,7 +24,7 @@ export default function DreamAiInterpreter({ dreamTitle }: Props) {
       const res = await fetch('/api/interpret', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dream: text, context: dreamTitle }),
+        body: JSON.stringify({ dream: text, context: dreamTitle, locale }),
       });
       const data = await res.json();
       setResult(data.interpretation || t('empty'));
@@ -67,6 +67,19 @@ export default function DreamAiInterpreter({ dreamTitle }: Props) {
             <Sparkles className="w-3 h-3" /> {t('result_label')}
           </p>
           <p className="text-stone-700 text-sm leading-relaxed">{result}</p>
+          <div className="mt-4 pt-3 border-t border-violet-50 flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-xs text-stone-400">
+              {locale === 'uz' ? "Har kuni yangi tush taʼbiri:" : 'Ежедневное толкование в Telegram:'}
+            </p>
+            <a
+              href={locale === 'uz' ? 'https://t.me/ruyo_uz' : 'https://t.me/ruyouz_ru'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 hover:bg-violet-100 border border-violet-200 text-violet-700 rounded-lg text-xs font-medium transition-colors"
+            >
+              ✈️ {locale === 'uz' ? "Obuna bo'lish" : 'Наш канал'}
+            </a>
+          </div>
         </div>
       )}
     </div>

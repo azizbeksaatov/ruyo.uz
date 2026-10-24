@@ -4,7 +4,7 @@ import { viralTests } from '@/data/tests';
 import { testTranslationsUz, type TestUz } from '@/data/testTranslationsUz';
 
 function utmLink(locale: string, slug: string): string {
-  return `https://ruyo.uz/${locale}/test/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=test`;
+  return `https://www.ruyo.uz/${locale === 'uz' ? 'uz/testy' : 'testy'}/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=test`;
 }
 
 export async function GET(req: NextRequest) {

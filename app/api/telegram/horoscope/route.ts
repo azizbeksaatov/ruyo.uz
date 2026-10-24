@@ -11,7 +11,7 @@ function todayLabel(months: string[]): string {
 }
 
 function utmLink(locale: string, slug: string): string {
-  return `https://ruyo.uz/${locale}/goroskop/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=horoscope`;
+  return `https://www.ruyo.uz/${locale === 'uz' ? 'uz/goroskop' : 'goroskop'}/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=horoscope`;
 }
 
 interface HoroText { general: string; love: string; finance: string; advice: string }

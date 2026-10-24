@@ -1,6 +1,22 @@
 {
   "crons": [
     {
+      "path": "/api/ping",
+      "schedule": "0 6 */3 * *"
+    },
+    {
+      "path": "/api/horoscope/daily",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/horoscope/weekly",
+      "schedule": "0 1 * * 1"
+    },
+    {
+      "path": "/api/horoscope/monthly",
+      "schedule": "0 1 1 * *"
+    },
+    {
       "path": "/api/telegram/horoscope",
       "schedule": "0 3 * * *"
     },
@@ -15,6 +31,10 @@
     {
       "path": "/api/telegram/test",
       "schedule": "0 11 * * 5,6"
+    },
+    {
+      "path": "/api/instagram/daily",
+      "schedule": "0 5 * * *"
     }
   ]
 }

@@ -1,11 +1,11 @@
 import { MetadataRoute } from 'next';
-import { dreams } from '@/data/dreams';
 import { zodiacSigns } from '@/data/horoscopes';
+import { fetchAllDreamSlugs } from '@/lib/dreams-db';
 import { viralTests } from '@/data/tests';
 import { getSlugDate, VARIANTS } from '@/lib/discover';
 import { createServerSupabase } from '@/lib/supabase';
 
-const BASE_URL = 'https://ruyo.uz';
+const BASE_URL = 'https://www.ruyo.uz';
 const locales = ['ru', 'uz'];
 const NOW = new Date();
 
@@ -16,7 +16,7 @@ async function fetchNameSlugs(): Promise<string[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const nameSlugs = await fetchNameSlugs();
+  const [nameSlugs, dreamSlugs] = await Promise.all([fetchNameSlugs(), fetchAllDreamSlugs()]);
   const entries: MetadataRoute.Sitemap = [];
 
   for (const locale of locales) {
@@ -25,17 +25,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Static pages
     entries.push(
       { url: prefix ? `${BASE_URL}${prefix}` : BASE_URL, lastModified: NOW, changeFrequency: 'daily',  priority: 1.0 },
-      { url: `${BASE_URL}${prefix}/sonnik`,  lastModified: NOW, changeFrequency: 'daily',  priority: 0.9 },
-      { url: `${BASE_URL}${prefix}/goroskop`,lastModified: NOW, changeFrequency: 'daily',  priority: 0.9 },
-      { url: `${BASE_URL}${prefix}/imena`,   lastModified: NOW, changeFrequency: 'weekly', priority: 0.8 },
-      { url: `${BASE_URL}${prefix}/testy`,   lastModified: NOW, changeFrequency: 'weekly', priority: 0.8 },
+      { url: `${BASE_URL}${prefix}/sonnik`,               lastModified: NOW, changeFrequency: 'daily',  priority: 0.9 },
+      { url: `${BASE_URL}${prefix}/goroskop`,             lastModified: NOW, changeFrequency: 'daily',  priority: 0.9 },
+      { url: `${BASE_URL}${prefix}/goroskop/personalnyy`, lastModified: NOW, changeFrequency: 'monthly',priority: 0.6 },
+      { url: `${BASE_URL}${prefix}/imena`,                lastModified: NOW, changeFrequency: 'weekly', priority: 0.8 },
+      { url: `${BASE_URL}${prefix}/testy`,                lastModified: NOW, changeFrequency: 'weekly', priority: 0.8 },
+      { url: `${BASE_URL}${prefix}/about`,                lastModified: NOW, changeFrequency: 'monthly',priority: 0.3 },
+      { url: `${BASE_URL}${prefix}/privacy`,              lastModified: NOW, changeFrequency: 'monthly',priority: 0.3 },
     );
 
     // Dream pages — weekly so Google recrawls and picks up freshness signals
-    for (const dream of dreams) {
+    for (const slug of dreamSlugs) {
       entries.push({
-        url: `${BASE_URL}${prefix}/sonnik/${dream.slug}`,
-        lastModified: new Date(getSlugDate(dream.slug)),
+        url: `${BASE_URL}${prefix}/sonnik/${slug}`,
+        lastModified: new Date(getSlugDate(slug)),
         changeFrequency: 'weekly',
         priority: 0.75,
       });

@@ -1,6 +1,7 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { zodiacSigns } from '@/data/horoscopes';
+import { zodiacSignsUz } from '@/data/horoscopes-uz';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -10,14 +11,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('title_today'),
     description: t('subtitle'),
     alternates: {
-      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/goroskop' : 'https://ruyo.uz/goroskop',
-      languages: { ru: 'https://ruyo.uz/goroskop', uz: 'https://ruyo.uz/uz/goroskop' },
+      canonical: locale === 'uz' ? 'https://www.ruyo.uz/uz/goroskop' : 'https://www.ruyo.uz/goroskop',
+      languages: { ru: 'https://www.ruyo.uz/goroskop', uz: 'https://www.ruyo.uz/uz/goroskop' },
     },
   };
 }
 
 export default async function GoroskopPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'goroskop' });
 
   const periods = [
@@ -87,9 +89,11 @@ export default async function GoroskopPage({ params }: { params: Promise<{ local
           >
             <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{sign.emoji}</div>
             <div className="font-semibold text-stone-900 mb-0.5">{locale === 'uz' ? sign.uz : sign.ru}</div>
-            <div className="text-xs text-stone-400 mb-3">{sign.dates}</div>
+            <div className="text-xs text-stone-400 mb-3">
+              {locale === 'uz' ? (zodiacSignsUz[sign.slug]?.datesUz ?? sign.dates) : sign.dates}
+            </div>
             <div className="flex flex-wrap gap-1">
-              {sign.traits.slice(0, 2).map((trait) => (
+              {(locale === 'uz' ? sign.traitsUz : sign.traits).slice(0, 2).map((trait) => (
                 <span key={trait} className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs">
                   {trait}
                 </span>

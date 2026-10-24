@@ -9,8 +9,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       ? "Ruyo.uz maxfiylik siyosati. Biz sizning shaxsiy ma'lumotlaringizni himoya qilamiz."
       : 'Политика конфиденциальности сайта Ruyo.uz. Мы уважаем вашу приватность и защищаем ваши данные.',
     alternates: {
-      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/privacy' : 'https://ruyo.uz/privacy',
-      languages: { ru: 'https://ruyo.uz/privacy', uz: 'https://ruyo.uz/uz/privacy' },
+      canonical: locale === 'uz' ? 'https://www.ruyo.uz/uz/privacy' : 'https://www.ruyo.uz/privacy',
+      languages: { ru: 'https://www.ruyo.uz/privacy', uz: 'https://www.ruyo.uz/uz/privacy' },
     },
     robots: { index: true, follow: true },
   };

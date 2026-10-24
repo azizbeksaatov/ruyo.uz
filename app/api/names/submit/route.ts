@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase';
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { createAdminSupabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown';
 
   try {
-    const sb = createServerSupabase();
+    const sb = createAdminSupabase();
     const { error } = await sb.from('name_submissions').insert({
       name: name.trim(),
       gender,

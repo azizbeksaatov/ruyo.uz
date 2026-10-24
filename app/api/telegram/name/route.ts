@@ -3,7 +3,7 @@ import { broadcastBilingual, dailyIndex } from '@/lib/telegram';
 import { names } from '@/data/names';
 
 function utmLink(locale: string, slug: string): string {
-  return `https://ruyo.uz/${locale}/imya/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=imya`;
+  return `https://www.ruyo.uz/${locale === 'uz' ? 'uz/imena' : 'imena'}/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=imya`;
 }
 
 const sortedNames = [...names].sort((a, b) => b.popularity - a.popularity);

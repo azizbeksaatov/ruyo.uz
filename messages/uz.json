@@ -84,9 +84,9 @@
     "subtitle": "Zodiak belgingizni yoki bashorat turini tanlang",
     "choose_sign": "Zodiak belgisini tanlang",
     "choose_sign_divider": "Belgini tanlang",
-    "today": "Bugun uchun",
+    "today": "Bugun",
     "today_desc": "Bugungi kun uchun prognoz",
-    "week": "Hafta uchun",
+    "week": "Hafta",
     "week_desc": "Bu haftada nima kutmoqda",
     "month": "Oy uchun",
     "month_desc": "Joriy oy uchun prognoz",
@@ -113,11 +113,7 @@
     "compat_subtitle": "Kim bilan mos kelishingizni bilish uchun belgingizni tanlang",
     "personal_label": "Shaxsiy bashorat",
     "personal_title": "Shaxsiy munajjimlar bashorati",
-    "personal_subtitle": "Tug'ilgan sanangizni kiriting — biz zodiak belgingizni hisoblab, shaxsiy bashorat tuzamiz",
-    "today": "Bugun",
-    "week": "Hafta",
-    "love": "Muhabbat",
-    "compatibility": "Muvofiklik"
+    "personal_subtitle": "Tug'ilgan sanangizni kiriting — biz zodiak belgingizni hisoblab, shaxsiy bashorat tuzamiz"
   },
   "names": {
     "label": "Ismlar",

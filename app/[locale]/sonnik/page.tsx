@@ -1,13 +1,12 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { dreams } from '@/data/dreams';
-import { dreamsUz } from '@/data/dreams-uz';
-import { ALPHABET_RU, getUzFirstLetter } from '@/lib/utils';
-import { Search } from 'lucide-react';
+import { ALPHABET_RU } from '@/lib/utils';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import { fetchDreamsListing, fetchDreamLetters, DREAMS_PAGE_SIZE } from '@/lib/dreams-db';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -16,8 +15,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('title'),
     description: t('subtitle'),
     alternates: {
-      canonical: locale === 'uz' ? 'https://ruyo.uz/uz/sonnik' : 'https://ruyo.uz/sonnik',
-      languages: { ru: 'https://ruyo.uz/sonnik', uz: 'https://ruyo.uz/uz/sonnik' },
+      canonical: locale === 'uz' ? 'https://www.ruyo.uz/uz/sonnik' : 'https://www.ruyo.uz/sonnik',
+      languages: { ru: 'https://www.ruyo.uz/sonnik', uz: 'https://www.ruyo.uz/uz/sonnik' },
     },
   };
 }
@@ -27,12 +26,13 @@ export default async function SonnikPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; letter?: string }>;
+  searchParams: Promise<{ q?: string; letter?: string; page?: string }>;
 }) {
   const { locale } = await params;
-  const { q, letter } = await searchParams;
+  setRequestLocale(locale);
+  const { q, letter, page: pageStr } = await searchParams;
 
-  // Auto-switch locale based on script: Latin on RU page → UZ; Cyrillic on UZ page → RU
+  // Auto-switch locale based on script
   if (q?.trim()) {
     const hasCyr = /[Ѐ-ӿ]/.test(q);
     const hasLat = /[a-zA-Z]/.test(q);
@@ -40,40 +40,24 @@ export default async function SonnikPage({
     if (locale === 'uz' && hasCyr)           redirect(`/sonnik?q=${encodeURIComponent(q)}`);
   }
 
+  const page = Math.max(1, parseInt(pageStr ?? '1') || 1);
   const t = await getTranslations({ locale, namespace: 'sonnik' });
 
-  // Deduplicate dreams by slug (dreams array has duplicate entries)
-  const seenSlugs = new Set<string>();
-  const uniqueDreams = dreams.filter(d => {
-    if (seenSlugs.has(d.slug)) return false;
-    seenSlugs.add(d.slug);
-    return true;
-  });
+  const [{ dreams: displayDreams, total }, uzAlphabet] = await Promise.all([
+    fetchDreamsListing({ q, letter, locale, page }),
+    locale === 'uz' ? fetchDreamLetters('uz') : Promise.resolve<string[]>([]),
+  ]);
 
-  // Build UZ alphabet from actual translated titles
-  const uzAlphabet = [...new Set(
-    uniqueDreams.map(d => getUzFirstLetter(dreamsUz[d.slug]?.title ?? d.title))
-  )].filter(Boolean).sort();
+  const totalPages = Math.ceil(total / DREAMS_PAGE_SIZE);
+  const sonnikBase = locale === 'ru' ? '/sonnik' : `/${locale}/sonnik`;
 
-  const displayDreams = (
-    q
-      ? uniqueDreams.filter(d => {
-          const title = locale === 'uz' ? (dreamsUz[d.slug]?.title ?? d.title) : d.title;
-          const tags = locale === 'uz' ? (dreamsUz[d.slug]?.tags ?? d.tags) : d.tags;
-          const ql = q.toLowerCase();
-          return title.toLowerCase().includes(ql) || tags.some(t => t.toLowerCase().includes(ql));
-        })
-      : letter && locale === 'uz'
-      ? uniqueDreams.filter(d => getUzFirstLetter(dreamsUz[d.slug]?.title ?? d.title) === letter)
-      : letter
-      ? uniqueDreams.filter(d => d.title.charAt(0).toUpperCase() === letter.toUpperCase())
-      : uniqueDreams
-  ).sort((a, b) => {
-    if (locale === 'uz') {
-      return (dreamsUz[a.slug]?.title ?? a.title).localeCompare(dreamsUz[b.slug]?.title ?? b.title);
-    }
-    return a.title.localeCompare(b.title, 'ru');
-  });
+  function pageUrl(p: number) {
+    const parts: string[] = [];
+    if (q) parts.push(`q=${encodeURIComponent(q)}`);
+    if (letter) parts.push(`letter=${encodeURIComponent(letter)}`);
+    if (p > 1) parts.push(`page=${p}`);
+    return parts.length ? `${sonnikBase}?${parts.join('&')}` : sonnikBase;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -84,9 +68,7 @@ export default async function SonnikPage({
         <h1 className="font-serif text-4xl font-semibold text-stone-900 mb-3">
           {t('title_full')}
         </h1>
-        <p className="text-stone-500 max-w-xl">
-          {t('subtitle')}
-        </p>
+        <p className="text-stone-500 max-w-xl">{t('subtitle')}</p>
       </div>
 
       {/* Search */}
@@ -110,7 +92,7 @@ export default async function SonnikPage({
       {/* Alphabet */}
       <div className="flex flex-wrap gap-1.5 mb-10">
         <a
-          href={`/${locale}/sonnik`}
+          href={sonnikBase}
           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${!letter && !q ? 'bg-violet-600 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:border-violet-300 hover:text-violet-600'}`}
         >
           {t('alphabet_all')}
@@ -118,7 +100,7 @@ export default async function SonnikPage({
         {(locale === 'uz' ? uzAlphabet : ALPHABET_RU).map((char) => (
           <a
             key={char}
-            href={`/${locale}/sonnik?letter=${encodeURIComponent(char)}`}
+            href={`${sonnikBase}?letter=${encodeURIComponent(char)}`}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${letter === char ? 'bg-violet-600 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:border-violet-300 hover:text-violet-600'}`}
           >
             {char}
@@ -133,7 +115,7 @@ export default async function SonnikPage({
             : locale === 'uz'
             ? `«${letter}» harfidan boshlanuvchi:`
             : `Буква «${letter?.toUpperCase()}»:`}{' '}
-          <span className="font-medium text-stone-900">{displayDreams.length}</span> {t('dreams_suffix')}
+          <span className="font-medium text-stone-900">{total}</span> {t('dreams_suffix')}
         </p>
       )}
 
@@ -141,43 +123,77 @@ export default async function SonnikPage({
         <div className="text-center py-20 text-stone-400">
           <div className="text-5xl mb-4">🌙</div>
           <p className="font-medium text-stone-600 mb-2">{t('not_found')}</p>
-          <Link href={`/${locale}/sonnik`} className="text-violet-600 hover:underline text-sm">
+          <Link href={sonnikBase} className="text-violet-600 hover:underline text-sm">
             {t('see_all')}
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {displayDreams.map((dream) => {
-            const uz = locale === 'uz' ? dreamsUz[dream.slug] : undefined;
-            const title = uz?.title ?? dream.title;
-            const short = uz?.short ?? dream.short;
-            const tags = uz?.tags ?? dream.tags;
-            return (
-            <Link
-              key={dream.slug}
-              href={`/${locale}/sonnik/${dream.slug}`}
-              className="group p-5 rounded-2xl bg-white border border-stone-200 hover:border-violet-200 hover:shadow-md transition-all card-shadow"
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-xl mt-0.5">🌙</span>
-                <div className="min-w-0">
-                  <h2 className="font-semibold text-stone-900 group-hover:text-violet-700 transition-colors">
-                    {title}
-                  </h2>
-                  <p className="text-sm text-stone-500 mt-1 line-clamp-2 leading-relaxed">{short}</p>
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {tags.slice(0, 2).map((tag) => (
-                      <span key={tag} className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 text-xs">
-                        {tag}
-                      </span>
-                    ))}
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {displayDreams.map((dream) => (
+              <Link
+                key={dream.slug}
+                href={`${sonnikBase}/${dream.slug}`}
+                className="group p-5 rounded-2xl bg-white border border-stone-200 hover:border-violet-200 hover:shadow-md transition-all card-shadow"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="text-xl mt-0.5">🌙</span>
+                  <div className="min-w-0">
+                    <h2 className="font-semibold text-stone-900 group-hover:text-violet-700 transition-colors">
+                      {dream.title}
+                    </h2>
+                    <p className="text-sm text-stone-500 mt-1 line-clamp-2 leading-relaxed">{dream.short}</p>
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {dream.tags.slice(0, 2).map((tag) => (
+                        <span key={tag} className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 text-xs">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-            );
-          })}
-        </div>
+              </Link>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 mt-12">
+              {page > 1 ? (
+                <Link
+                  href={pageUrl(page - 1)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-stone-200 text-stone-700 text-sm font-medium hover:border-violet-300 hover:text-violet-600 transition-colors card-shadow"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {locale === 'uz' ? 'Oldingi' : 'Назад'}
+                </Link>
+              ) : (
+                <span className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-stone-100 text-stone-300 text-sm font-medium cursor-not-allowed">
+                  <ChevronLeft className="w-4 h-4" />
+                  {locale === 'uz' ? 'Oldingi' : 'Назад'}
+                </span>
+              )}
+
+              <span className="text-sm text-stone-500 px-2">
+                {locale === 'uz' ? `${page} / ${totalPages} sahifa` : `Страница ${page} из ${totalPages}`}
+              </span>
+
+              {page < totalPages ? (
+                <Link
+                  href={pageUrl(page + 1)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-stone-200 text-stone-700 text-sm font-medium hover:border-violet-300 hover:text-violet-600 transition-colors card-shadow"
+                >
+                  {locale === 'uz' ? 'Keyingi' : 'Вперёд'}
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <span className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-stone-100 text-stone-300 text-sm font-medium cursor-not-allowed">
+                  {locale === 'uz' ? 'Keyingi' : 'Вперёд'}
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

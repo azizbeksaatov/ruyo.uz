@@ -1,5 +1,5 @@
-import type { Metadata } from 'next';
-import { createServerSupabase } from '@/lib/supabase';
+﻿import type { Metadata } from 'next';
+import { createAdminSupabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const ADMIN_KEY = process.env.ADMIN_SECRET_KEY;
 
 async function getSubmissions() {
-  const sb = createServerSupabase();
+  const sb = createAdminSupabase();
   const { data } = await sb
     .from('name_submissions')
     .select('*')
@@ -30,7 +30,7 @@ export default async function AdminNamesPage({
     notFound();
   }
 
-  const sb = createServerSupabase();
+  const sb = createAdminSupabase();
 
   if (action === 'approve' && id) {
     await sb.from('name_submissions').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);

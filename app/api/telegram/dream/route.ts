@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { broadcastBilingual, dailyIndex } from '@/lib/telegram';
-import { dreams } from '@/data/dreams';
-import { dreamsUz } from '@/data/dreams-uz';
+import { broadcastBilingual } from '@/lib/telegram';
+import { fetchDreamOfDay } from '@/lib/dreams-db';
 
 function utmLink(locale: string, slug: string): string {
-  return `https://ruyo.uz/${locale}/sonnik/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=sonnik`;
+  return `https://www.ruyo.uz/${locale === 'uz' ? 'uz/sonnik' : 'sonnik'}/${slug}?utm_source=telegram&utm_medium=social&utm_campaign=sonnik`;
 }
 
 export async function GET(req: NextRequest) {
@@ -13,44 +12,45 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const idx = dailyIndex(dreams, 1);
-  const dream = dreams[idx];
-  const uz = dreamsUz[dream.slug];
+  const [dreamRu, dreamUz] = await Promise.all([
+    fetchDreamOfDay('ru'),
+    fetchDreamOfDay('uz'),
+  ]);
+
+  if (!dreamRu || !dreamUz) {
+    return NextResponse.json({ error: 'No dream found' }, { status: 500 });
+  }
 
   const textRu =
-`🌙 <b>К чему снится ${dream.title.toLowerCase()}?</b>
+`🌙 <b>К чему снится ${dreamRu.title.toLowerCase()}?</b>
 
-💭 ${dream.short}
+💭 ${dreamRu.short}
 
-👩 <b>Для женщин:</b> ${dream.forWoman.slice(0, 120)}...
-👨 <b>Для мужчин:</b> ${dream.forMan.slice(0, 120)}...
+👩 <b>Для женщин:</b> ${dreamRu.forWoman.slice(0, 120)}...
+👨 <b>Для мужчин:</b> ${dreamRu.forMan.slice(0, 120)}...
 
-📖 Полное толкование → ${utmLink('ru', dream.slug)}
+📖 Полное толкование → ${utmLink('ru', dreamRu.slug)}
 
 #сонник #сон #тушта #ruyo`;
 
-  const uzTitle = uz?.title ?? dream.title;
-  const uzShort = uz?.short ?? dream.short;
-  const uzForWoman = uz?.forWoman ?? dream.forWoman;
-  const uzForMan = uz?.forMan ?? dream.forMan;
-
   const textUz =
-`🌙 <b>Tushda ${uzTitle.toLowerCase()} ko'rish nima degani?</b>
+`🌙 <b>Tushda ${dreamUz.title.toLowerCase()} ko'rish nima degani?</b>
 
-💭 ${uzShort}
+💭 ${dreamUz.short}
 
-👩 <b>Ayollar uchun:</b> ${uzForWoman.slice(0, 120)}...
-👨 <b>Erkaklar uchun:</b> ${uzForMan.slice(0, 120)}...
+👩 <b>Ayollar uchun:</b> ${dreamUz.forWoman.slice(0, 120)}...
+👨 <b>Erkaklar uchun:</b> ${dreamUz.forMan.slice(0, 120)}...
 
-📖 To'liq ta'birni o'qish → ${utmLink('uz', dream.slug)}
+📖 To'liq ta'birni o'qish → ${utmLink('uz', dreamUz.slug)}
 
 #tushta #tushta'biri #ruyo`;
 
   try {
     await broadcastBilingual(textRu, textUz);
-    return NextResponse.json({ ok: true, dream: dream.slug });
-  } catch (err: any) {
-    console.error('Telegram dream error:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ ok: true, dream: dreamRu.slug });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Telegram dream error:', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

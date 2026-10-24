@@ -39,7 +39,6 @@ export async function fetchNames(opts: {
   if (origin) query = query.eq('origin', origin);
   if (q) query = query.ilike('name', `%${toDbSearchQuery(q, locale)}%`);
   if (letter) {
-    // For Uzbek locale the letter filter arrives as Latin — convert back to Cyrillic for the DB query
     const dbLetter = locale === 'uz' ? (LATIN_TO_CYR[letter] ?? letter) : letter;
     query = query.ilike('name', `${dbLetter}%`);
   }
